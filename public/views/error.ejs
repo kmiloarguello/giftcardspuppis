@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ups!</title>
+    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <main id="main-page">
+        <div class="container-image">
+            <img src="../img/astronaute.png" alt="Astronauta 404" />
+        </div>
+        <div class="container-main-text">
+            <h1>This Page is Lost in Space</h1>
+            <p>Contact to the administrator.</p>
+        </div>
+        <div class="details-message">
+            <h3><%= message %></h3>
+            <h4><%= error.status %></h4>
+            <pre><%= error.stack %></pre>
+        </div>
+    </main>
+</body>
+</html>

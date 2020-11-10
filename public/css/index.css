@@ -1,0 +1,81 @@
+*,
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+main#main-page{
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(131, 217, 200);
+}
+
+.container-image{
+    display: block;
+    position: relative;
+}
+
+.container-image img{
+    width: 300px;
+    height: auto;
+    margin: auto;
+    display: block;
+}
+
+@media screen and (max-width: 768px){
+    .container-image{
+        width: 100%;
+    }
+}
+
+.container-main-text{
+    display: grid;
+    position: relative;
+    padding: 10px;
+}
+
+.container-main-text h1,
+.container-main-text p{
+    color: rgb(92, 119, 172);
+    text-align: center;
+}
+
+.container-main-text h1{
+    font-size: 1.3em;
+    font-weight: bold;
+    
+}
+.container-main-text p{
+    font-size: 1em;
+    font-weight: 400;
+}
+
+.details-message{
+    margin: 10px 50px;
+    display: grid;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgb(54, 180, 155);
+    width: auto;
+    height: auto;
+}
+
+.details-message h3,
+.details-message h4,
+.details-message pre{
+    font-family: 'Courier New', Courier, monospace;
+    text-align: left;
+    font-weight: 300;
+}
+.details-message h3{
+    font-size: 1em;
+}
+.details-message h4{
+    font-size: .9em;
+}
+.details-message pre{
+    font-size: .8em;
+}
+

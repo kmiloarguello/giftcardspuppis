@@ -1,0 +1,86 @@
+require('dotenv').config()
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+//import routes
+const confluences = require('./routes/confluences');
+const establishment = require('./routes/establishment');
+const sues = require('./routes/sues');
+const users = require('./routes/users');
+const owners = require('./routes/owners');
+const managers = require('./routes/managers');
+const shifts = require('./routes/shifts');
+const visit = require('./routes/visit');
+const orders = require('./routes/orders');
+const Authentication = require('./routes/auth');
+const session = require('./config/session')
+
+const app = express();app.use(cors());
+
+//Your Express app needs to use CORS (Cross-Origin Resource Sharing)
+app.use(cors());
+app.use(session)
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", '*');
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
+  next();
+});
+
+// Body parser middleWare
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+
+// DB config
+// mongoose
+require('./config/db.config');
+
+//Passport middleWare
+app.use(passport.initialize());
+
+// Use routes
+app.use('/confluences', confluences);
+
+// Tasks
+//require('./utils/tasks');
+
+// view engine setup
+app.set('views', path.join(__dirname, 'public/views'));
+app.set('view engine', 'ejs');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+ const port = process.env.PORT || 5000;
+ app.listen(port, () => console.log(`Server running on port ${port}`));
+
+module.exports = app;
