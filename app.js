@@ -10,23 +10,12 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 //import routes
-const confluences = require('./routes/confluences');
-const establishment = require('./routes/establishment');
-const sues = require('./routes/sues');
-const users = require('./routes/users');
-const owners = require('./routes/owners');
-const managers = require('./routes/managers');
-const shifts = require('./routes/shifts');
-const visit = require('./routes/visit');
-const orders = require('./routes/orders');
-const Authentication = require('./routes/auth');
-const session = require('./config/session')
+const giftcards = require('./routes/giftcards');
 
 const app = express();app.use(cors());
 
 //Your Express app needs to use CORS (Cross-Origin Resource Sharing)
 app.use(cors());
-app.use(session)
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", '*');
@@ -40,15 +29,9 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 
-// DB config
-// mongoose
-require('./config/db.config');
-
-//Passport middleWare
-app.use(passport.initialize());
 
 // Use routes
-app.use('/confluences', confluences);
+app.use('/api', giftcards);
 
 // Tasks
 //require('./utils/tasks');
