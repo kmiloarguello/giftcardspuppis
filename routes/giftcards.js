@@ -25,12 +25,22 @@ router.post("/", (req, res) => {
     'Content-Type': 'application/json',
 		}
   };
-  
-  console.log("Verificando order ....");
+
+
+
+  const timeforCheckOrder = 1;
+
+  console.log("TASK: [⏰] Verificando order: " + orderId + " en: " + timeforCheckOrder + " minuto. ");
+  let makeCheckout = cron.schedule(`*/${timeforCheckOrder} * * * *`, () => {
+    
+    console.log("TASK: [⏰⏰] Verificacion de order: " + orderId + " ha iniciado.");
+    
+    console.log("Verificando order .... attendez svp!");
 	request(orderIdOptions, (err, response, body) => {
 		if(err) console.error(err);
 		if(response && response.statusCode === 200 && typeof body !== "undefined"){
 
+      console.log("Order verificada correctamente.")
       let jBody = JSON.parse(body);
      
       let userProfileId = jBody.clientProfileData.userProfileId;
@@ -162,14 +172,24 @@ router.post("/", (req, res) => {
         
       })
 
+      makeCheckout.stop();
 		}else{
       console.log("Rechazada.", response.statusCode,body);
+      makeCheckout.stop();
       res.json({
         success: false,
         response
       })
 		}
   });
+
+
+    
+  });
+
+                                    
+  
+  
 
 });
 
