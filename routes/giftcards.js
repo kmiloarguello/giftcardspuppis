@@ -41,7 +41,8 @@ router.post("/", (req, res) => {
       let jBody = JSON.parse(body);
 
       let userProfileId = jBody.clientProfileData.userProfileId;
-      let userName = jBody.clientProfileData.firstName;
+	  let userName = jBody.clientProfileData.firstName;
+	  let giftCardValue = String(jBody.value);
 
       let getProfileData = {
         url:
@@ -66,7 +67,7 @@ router.post("/", (req, res) => {
         let userEmail = jUserBody.email;
 
         // TODO: Get the expected value from the items (for each one)
-        const giftCardValue = "4500000";
+        //const giftCardValue = "4500000";
 
         // TODO: HANGE THIS LATER to DIF of Null
         if (jBody.customData == null) {
