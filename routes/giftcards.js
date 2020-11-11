@@ -8,7 +8,7 @@ const { errorGenerator } = require("../utils/curries");
 
 router.post("/", (req, res) => {
 
-  console.log("Received by trigger...");
+  console.log("Received by trigger...", req.body);
   const recipientName = "Vincent J.";
   const recipientEmail = "amigovincent@mailinator.com";
   const recipientCC = "1033123456";
@@ -163,7 +163,7 @@ router.post("/", (req, res) => {
       })
 
 		}else{
-      console.log("Rechazada.")
+      console.log("Rechazada.", response.statusCode,body);
       res.json({
         success: false,
         response
