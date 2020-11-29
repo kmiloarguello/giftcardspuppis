@@ -319,4 +319,21 @@ router.get("/get-order", (req, res) => {
   });
 });
 
+
+
+router.post("/create-giftcard", (req,res) => {
+  res.json({
+    success: true,
+    body: req.body
+  })
+});
+
+router.post("/delete-giftcard", (req,res) => {
+  res.json({
+    success: true,
+    body: req.body
+  })
+});
+
+
 module.exports = router;
