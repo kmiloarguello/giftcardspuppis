@@ -5,3 +5,4 @@ config/keys.js
 .env.dev
 .env.prod
 _backup/
+Design/
