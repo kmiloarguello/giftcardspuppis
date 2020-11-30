@@ -36,6 +36,7 @@ router.post("/", async (req, res) => {
     // USELESS
     //let orderInfoUpdate = await setCustomGiftCardData(orderInfo.data.orderFormId,newGiftCard.data.id);
     
+    console.log("Order: " + orderInfo.data.orderId + "💳 Updating MD");
     let sendInfoToMD = await createMDGiftCards(orderId, userData.data, recipientData, giftCardFinalData.data)
 
     return res.json({
@@ -47,17 +48,30 @@ router.post("/", async (req, res) => {
 
     console.log("Verifying Cancelling order... " + orderId);
     let orderInfo = await getOrderInfo(orderId);
-    console.log("Order: " + orderInfo.data.orderId + " verified.");
+    console.log("Cancel order: " + orderInfo.data.orderId + " verified.");
 
+    console.log("Cancel order: " + orderInfo.data.orderId + "💳 Getting gift Card from MD.");
     let giftCardFound = await getGiftCardDetailsFromMD(orderInfo.data.orderId);
 
+    if(giftCardFound.data.length == 0) {
+      console.log("Cancel order: " + orderInfo.data.orderId + "💳 Not giftcard found. EXIT");
+      return res.json({
+        success: false,
+        message: "The giftcard does not exist"
+      });
+    }
+
     let giftcardId = giftCardFound.data[0]["giftcardId"];
+    console.log("Cancel order: " + orderInfo.data.orderId + "💳 Assigning a NEGATIVE Balance");
     let giftCardToCancel = await getGiftCardById(giftcardId);
     let giftCardCancelled = await assignValueNewGiftCard(giftCardToCancel.data, -1);
+
+    console.log("Cancel order: " + orderInfo.data.orderId + "💳 Updating MD Giftcard");
     let documentId = giftCardFound.data[0]["id"];
     let sendInfoToMD = await updateMDGiftCards(giftCardCancelled.data,documentId);
+    console.log("Cancel order: " + orderInfo.data.orderId + "💳 Giftcard: " + giftcardId + " Done!");
     
-    res.json({
+    return res.json({
       success: true,
       message: "Giftcard cancelled correctly"
     });
@@ -190,6 +204,7 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
     email: userData.email,
     userId: userData.userId,
     userName: userData.firstName,
+    statusGiftCard: giftCardData.statusGiftCard
   }
 
   return axios.post("/api/dataentities/GG/documents", _giftCardFinalData);
@@ -206,17 +221,13 @@ const updateMDGiftCards = (giftCardData, documentId) => {
 
   const _giftCardFinalData = {
     balance: String(iGiftValue),
+    statusGiftCard: giftCardData.statusGiftCard || "payment-approved"
   }
 
   return axios.patch("/api/dataentities/GG/documents/" + documentId, _giftCardFinalData);
 }
 
 
-
-// Useless
-const setCustomGiftCardData = (orderFormId, giftCardId) => {
-  return axios.put("/api/checkout/pub/orderForm/" + orderFormId + "/customData/giftcardrecipient/giftCardId", giftCardId);
-}
 
 const getGiftCardDetailsFromMD = (orderId) => {
   return axios.get("/api/dataentities/GG/search?orderId=" + orderId + "&_fields=_all");
