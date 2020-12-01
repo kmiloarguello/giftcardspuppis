@@ -327,7 +327,7 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
     expiringDate: giftCardData.expiringDate,
     giftcardId: String(giftCardData.id),
     orderId,
-    recipientEmail: recipientData.recipientEmail,
+    recipientEmail1: recipientData.recipientEmail,
     recipientCC: recipientData.recipientCC,
     recipientName: recipientData.recipientName,
     redemptionCode: giftCardData.redemptionCode,
