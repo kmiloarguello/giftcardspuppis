@@ -42,10 +42,10 @@ router.post("/", (req, res) => {
                     .then(giftCardFinalData => {
 
                       console.log("✅ Order: " + orderInfo.data.orderId + " has assigned correctly the giftcard balance.");
-                      createMDGiftCards(orderId, userData.data, recipientData, giftCardFinalData.data)
+                      createMDGiftCards(orderId, userData.data, recipientData, giftCardFinalData.data, orderStatus)
                         .then(sendInfoToMD => {
 
-                          console.log("✅ Order: " + orderInfo.data.orderId + " has sent it back the info to Vtex.");
+                          console.log("✅ Order: " + orderInfo.data.orderId + " has been sent it back the info to Vtex. EXIT.");
                           return res.json({
                             success: true,
                             message: "Giftfcard successfully created",
@@ -130,10 +130,10 @@ router.post("/", (req, res) => {
                       console.log("✅ Cancel order: " + orderInfo.data.orderId + "💳 Updating MD Giftcard");
                       let documentId = giftCardFound.data[0]["id"];
 
-                      updateMDGiftCards(giftCardCancelled.data,documentId)
+                      updateMDGiftCards(giftCardCancelled.data,documentId,orderStatus)
                         .then(sendInfoToMD => {
 
-                          console.log("✅ Cancel order: " + orderInfo.data.orderId + "💳 Giftcard: " + giftcardId + " Done!");
+                          console.log("✅ Cancel order: " + orderInfo.data.orderId + "💳 Giftcard: " + giftcardId + " Done! EXIT.");
 
                           return res.json({
                             success: true,
@@ -320,7 +320,7 @@ const assignValueNewGiftCard = (giftcard, giftCardValue) => {
 
 
 
-const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
+const createMDGiftCards = (orderId, userData, recipientData, giftCardData, statusGiftCard = "payment-approved") => {
 
   const _giftCardFinalData = {
     balance: String(parseInt(giftCardData.balance) / 100),
@@ -334,7 +334,7 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
     email: userData.email,
     userId: userData.userId,
     userName: userData.firstName,
-    statusGiftCard: giftCardData.statusGiftCard || "payment-approved"
+    statusGiftCard
   }
 
   console.log("⏳ Sending the info to Vtex... 💳 ...");
@@ -345,7 +345,7 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
 
 
 
-const updateMDGiftCards = (giftCardData, documentId) => {
+const updateMDGiftCards = (giftCardData, documentId, statusGiftCard = "canceled") => {
 
   let iGiftValue = parseInt(giftCardData.balance) / 100;
 
@@ -355,7 +355,7 @@ const updateMDGiftCards = (giftCardData, documentId) => {
 
   const _giftCardFinalData = {
     balance: String(iGiftValue),
-    statusGiftCard: giftCardData.statusGiftCard || "payment-approved"
+    statusGiftCard
   }
 
   return axios.patch("/api/dataentities/GG/documents/" + documentId, _giftCardFinalData);
