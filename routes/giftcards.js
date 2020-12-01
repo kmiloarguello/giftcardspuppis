@@ -124,7 +124,9 @@ router.post("/", (req, res) => {
               getGiftCardById(giftcardId)
                 .then(giftCardToCancel => {
 
-                  assignValueNewGiftCard(giftCardToCancel.data, -1)
+                  let giftcardValue = getGiftcardValue(orderInfo.data);
+
+                  assignValueNewGiftCard(giftCardToCancel.data, parseInt((giftcardValue) * -1) )
                     .then(giftCardCancelled => {
                       
                       console.log("✅ Cancel order: " + orderInfo.data.orderId + "💳 Updating MD Giftcard");
@@ -349,7 +351,7 @@ const updateMDGiftCards = (giftCardData, documentId, statusGiftCard = "canceled"
 
   let iGiftValue = parseInt(giftCardData.balance) / 100;
 
-  if(iGiftValue <= 0) {
+  if(iGiftValue < 0) {
     iGiftValue = 0;
   }
 
