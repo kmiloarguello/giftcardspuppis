@@ -334,7 +334,7 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData) => {
     email: userData.email,
     userId: userData.userId,
     userName: userData.firstName,
-    statusGiftCard: giftCardData.statusGiftCard
+    statusGiftCard: giftCardData.statusGiftCard || "payment-approved"
   }
 
   console.log("⏳ Sending the info to Vtex... 💳 ...");
