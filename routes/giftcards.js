@@ -58,7 +58,7 @@ router.post("/", (req, res) => {
                           createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error saving the new Giftcard in Master Data.",newGiftCard.data.id );
                           return res.json({
                             success: false,
-                            message: "Error sending back the info to Master Data"
+                            message: "Order: " + orderId + ". Error saving the new Giftcard in Master Data."
                           });
                         });
                     })
@@ -67,7 +67,7 @@ router.post("/", (req, res) => {
                       createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error assigning value to the giftcard.",newGiftCard.data.id );
                       return res.json({
                         success: false,
-                        message: "Error assigning value to the giftcard"
+                        message: "Order: " + orderId + ". Error assigning value to the giftcard."
                       });
                     });
                 })
@@ -76,7 +76,7 @@ router.post("/", (req, res) => {
                   createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard.");
                   return res.json({
                     success: false,
-                    message: "The system could not create the giftcard"
+                    message: "Order: " + orderId + ". Error trying to create a giftcard."
                   });
                 });
             })
@@ -85,7 +85,7 @@ router.post("/", (req, res) => {
               createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error on User profile Data.");
               return res.json({
                 success: false,
-                message: "The system could not verify the user profile data"
+                message: "Order: " + orderId + ". Error on User profile Data."
               });
             });
         } else {
@@ -100,7 +100,7 @@ router.post("/", (req, res) => {
         createLogGiftCardinMD(orderId, "Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
-          message: "There was an error on the order"
+          message: "Order: " + orderId + " could not be verified."
         });
       })
 
