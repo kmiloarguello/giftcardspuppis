@@ -15,7 +15,6 @@ axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKE
 
 router.post("/", (req, res) => {
 
-  //let orderId = "1075511804077-01";
   let orderId = req.body.OrderId;
   let orderStatus = req.body.State;
 
@@ -329,11 +328,11 @@ const createMDGiftCards = (orderId, userData, recipientData, giftCardData, statu
     expiringDate: giftCardData.expiringDate,
     giftcardId: String(giftCardData.id),
     orderId,
-    recipientEmail1: recipientData.recipientEmail,
+    recipientEmail: recipientData.recipientEmail,
     recipientCC: recipientData.recipientCC,
     recipientName: recipientData.recipientName,
     redemptionCode: giftCardData.redemptionCode,
-    email: userData.email,
+    userEmail: userData.email,
     userId: userData.userId,
     userName: userData.firstName,
     statusGiftCard
