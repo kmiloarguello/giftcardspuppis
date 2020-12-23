@@ -1,6 +1,6 @@
-# Confflux Backend
+# Giftcards Puppis Backend
 
-This project stores the source code for Confflux backend.
+This project stores the source code for Giftcards backend.
 
 ## Technologies
 
@@ -19,24 +19,6 @@ The project is composed by six (6) main folders.
 4. `public` to create the views for documentation and errors.
 5. `config` Handle the sessions and tokens with Passport.
 6. `bin` to handle some server events.
-
-## Documentation
-
-The whole documentation was created manually and it is available for each route at:
-
-### Establishement
-
-http://rocky-temple-28113.herokuapp.com/establishment/docs
-
-### Owner
-
-http://rocky-temple-28113.herokuapp.com/owners/docs
-
-### Users
-
-http://rocky-temple-28113.herokuapp.com/users/docs
-
-> The managers and sues will be depreciated in future versions. Avoid to use them.
 
 ## Contribution
 
