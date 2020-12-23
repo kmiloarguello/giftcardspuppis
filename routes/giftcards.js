@@ -289,12 +289,12 @@ const creatingGiftNewGiftCard = (recipientData, giftCardValue, expiringDate) => 
   console.log("⏳ Creating gift Card 💳 ...");
 
   let giftCardData = {
-    customerId: recipientData.recipientEmail,
+    customerId: recipientData.recipientEmail, // The giftcard will always be attached to this user
     expiringDate,
     balance: giftCardValue,
     cardName: recipientData.recipientCC,
     caption: "Tarjeta-por-" + parseInt(giftCardValue) / 100 + "cliente-" + recipientData.recipientCC,
-    multipleCredits: true,
+    multipleCredits: false,
     multipleRedemptions: true,
     restrictedToOwner: true
   }
