@@ -204,6 +204,14 @@ router.post("/", (req, res) => {
 });
 
 
+router.post("/sms", (req, res) => {
+  console.log("THE BODY IS", req.body);
+  res.json({
+    success: true,
+    body: req.body
+  })
+})
+
 
 
 const getOrderInfo =  (orderId) => {
@@ -224,9 +232,7 @@ const getGiftcardValue = (order) => {
   if (typeof items != "object" || items.length == 0) return console.log("items is undefined");
 
   let giftCardProducts = items.filter(item => {
-    //console.log("item", item.name)
-    // TODO: VERIFY WHEN IS A GIFTCARD
-    if (/tarjeta/ig.test(item.name)) {
+    if (/tarjeta/ig.test(item.name) && /regalo/ig.test(item.name)) {
       return item.price;
     }
   });
