@@ -206,12 +206,35 @@ router.post("/", (req, res) => {
 
 router.post("/sms", (req, res) => {
   console.log("THE BODY IS", req.body);
-  res.json({
-    success: true,
-    body: req.body
-  })
-})
+  
+  let orderId = req.body.orderId;
+  let orderStatus = req.body.status;
 
+  getOrderInfo(orderId)
+      .then(orderInfo => {
+          getProfileData(orderInfo.data)
+            .then(userData => {
+              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");           
+              res.json({
+                userData
+              })
+            })
+            .catch(error => {
+              console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error on User profile Data."
+              });
+            });
+      })
+      .catch(error => {
+        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        return res.json({
+          success: false,
+          message: "Order: " + orderId + " could not be verified."
+        });
+      })
+});
 
 
 const getOrderInfo =  (orderId) => {
