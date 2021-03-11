@@ -3,7 +3,10 @@ const router = express.Router();
 const request = require("request");
 const https = require("https");
 const axios = require('axios');
-var cron = require("node-cron");
+const cron = require("node-cron");
+const multer  =   require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const { errorGenerator } = require("../utils/curries");
 const { response } = require("express");
@@ -235,6 +238,38 @@ router.post("/sms", (req, res) => {
         });
       })
 });
+
+
+router.get('/download', async (req, res) => {
+
+  let { query } = req;
+
+  if (Object.keys(query).length == 0 || !/pdf/ig.test(Object.keys(query)[0]) ) {
+    res.sendStatus(400);
+    return;
+  }
+
+  let pdfToSearch = query.pdf;
+
+  fs.readdir(path.resolve(".") +'/uploads', function (err, files) {
+    if (err) {
+      console.log(err);
+      res.sendStatus(400);
+      return;
+    }
+
+    const foundFiles = files.filter(file => new RegExp(pdfToSearch, "ig").test(file) );
+
+    if (foundFiles.length > 0) {
+      const file = foundFiles[0];
+      res.download(path.resolve(".") +'/uploads/' + file, file);
+    } else {
+      res.sendStatus(404);
+    }
+
+  });
+});
+
 
 
 const getOrderInfo =  (orderId) => {
