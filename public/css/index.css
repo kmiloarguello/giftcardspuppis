@@ -4,12 +4,14 @@ body{
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
 }
 
 main#main-page{
-    height: 100vh;
+    height: 100%;
     width: 100vw;
-    background-color: rgb(131, 217, 200);
+    background-color: #7dcfe4;
+    padding: 10px;
 }
 
 .container-image{
@@ -18,7 +20,7 @@ main#main-page{
 }
 
 .container-image img{
-    width: 300px;
+    width: 600px;
     height: auto;
     margin: auto;
     display: block;
@@ -38,26 +40,34 @@ main#main-page{
 
 .container-main-text h1,
 .container-main-text p{
-    color: rgb(92, 119, 172);
+    color: white;
     text-align: center;
 }
 
 .container-main-text h1{
-    font-size: 1.3em;
+    font-size: 1.5em;
+    line-height: 1.5;
     font-weight: bold;
     
 }
 .container-main-text p{
-    font-size: 1em;
+    font-size: 1.1em;
+    line-height: 1.1;
     font-weight: 400;
 }
-
+.container-main-text p a {
+    color: white;
+    display: block;
+    text-decoration: underline;
+    font-size: 1.3em;
+    font-weight: 500;
+}
 .details-message{
     margin: 10px 50px;
     display: grid;
     padding: 20px;
     border-radius: 10px;
-    background-color: rgb(54, 180, 155);
+    background-color: #92d6e7;
     width: auto;
     height: auto;
 }

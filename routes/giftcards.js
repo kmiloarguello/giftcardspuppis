@@ -198,11 +198,40 @@ router.post("/", (req, res) => {
           message: "CANCELING Order: " + orderId + " could not be verified."
         });
       })  
+  } else if (orderStatus == "start-handling"){
+    // This code is aimed to send a SMS to the user
+    getOrderInfo(orderId)
+      .then(orderInfo => {
+          getProfileData(orderInfo.data)
+            .then(userData => {
+              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");
+              console.log(userData);  
+              res.json({
+                success: true
+              })
+            })
+            .catch(error => {
+              console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error on User profile Data."
+              });
+            });
+      })
+      .catch(error => {
+        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        return res.json({
+          success: false,
+          message: "Order: " + orderId + " could not be verified."
+        });
+      })
   } else {
     return res.json({
       success: false
     });
   }
+
+  
  
 });
 
