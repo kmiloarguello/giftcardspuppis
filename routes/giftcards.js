@@ -199,16 +199,94 @@ router.post("/", (req, res) => {
         });
       })  
   } else if (orderStatus == "start-handling"){
+    
     // This code is aimed to send a SMS to the user
     getOrderInfo(orderId)
       .then(orderInfo => {
           getProfileData(orderInfo.data)
             .then(userData => {
               console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");
-              console.log(userData);  
-              res.json({
-                success: true
-              })
+
+              // Obtain User data to send the SMS
+              let user = userData.data;
+              let phoneNumber = null;
+              let firstName = userData.data.firstName;
+              let address = null; // The addres where the user must be pick up the products
+
+              // If the cellphone exists... use it
+              if (!/null/ig.test(user.cellPhone)) {
+                phoneNumber = user.cellPhone;
+
+              // If the homeophone exists... use it
+              } else if(!/null/ig.test(user.homePhone)) {
+                phoneNumber = user.homePhone;
+
+                // There is not available phone
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Order: " + orderId + ". The user has not a valid phone number."
+                })
+              }
+
+              // check if phone number has +57 at the very begining
+              // The goal is to having phone numbers like +573123456789
+              if (/\+57/i.test(phoneNumber)) {
+                // continue
+
+              // If the phone has the 57 but not the +
+              } else if(!/\+/i.test(phoneNumber) && /573*/i.test(phoneNumber)){
+                phoneNumber = "+" + phoneNumber;
+
+                // If the phone does not have the +57
+              } else {
+                // add the +57
+                phoneNumber = "+57" + phoneNumber;
+              }
+
+              // Get information about store to pick up 
+              let { logisticsInfo } = orderInfo.data.shippingData;
+              
+              // This message is only made when the user has a pickup point
+              if(/retiro/ig.test(logisticsInfo[0].selectedSla)) {
+                let logisticPointInfo = logisticsInfo[0].slas.filter(sla => logisticsInfo[0].selectedSla == sla.name);
+
+                if (logisticPointInfo.length > 0) {
+                  // Getting the address
+                  address = logisticPointInfo[0].pickupStoreInfo.address.street;
+
+                  console.log("⏳ Sending a SMS to the number " + phoneNumber + " ...");
+                  sendASMS(firstName, phoneNumber, address)
+                    .then(() => {
+                      console.log("✅ Message sent to " + phoneNumber);
+                      // Sending the SMS
+                      res.json({
+                        success: true,
+                        message: "The SMS has been sent successfully to the phone number " + phoneNumber
+                      })
+                    })
+                    .catch(error => {
+                      console.log("❗ Error sending the LOG information to MD", error);
+                      return res.json({
+                        success: false,
+                        message: "Order: " + orderId + ". There was an error sending the SMS"
+                      })
+                    })
+
+                } else {
+                  return res.json({
+                    success: false,
+                    message: "Order: " + orderId + ". Error trying to find the pickup point"
+                  })
+                }
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Order: " + orderId + ". This is not a pickup point;."
+                })
+              }
+
+
             })
             .catch(error => {
               console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
@@ -480,6 +558,30 @@ const getGiftCardDetailsFromMD = (orderId) => {
 }
 
 
+
+const sendASMS = (username, phone, address) => {
+
+  const messageWithAddress = `Hola ${username}, tu pedido de Puppis está listo para ser entregado. Acercate a nuestro punto recogida Puppis. Dirección: ${address} `;
+  const messaWithoutAddress = `Hola ${username}, tu pedido de Puppis está listo para ser entregado. Acercate a tu tienda Puppis mas cercana.`;
+  
+  let message = messageWithAddress;
+
+  if (!address) {
+    message = messaWithoutAddress;
+  }
+
+  const smsData = {  
+    from: "Puppis Colombia",
+    to: phone,
+    text: message
+ }
+  
+  return axios.post("http://api.messaging-service.com/sms/1/text/single", smsData, {
+    headers: {
+      'Authorization': `Basic ${process.env.TOKEN_SMS}`
+    }
+  });
+}
 
 
 module.exports = router;
