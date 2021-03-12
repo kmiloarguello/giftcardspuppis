@@ -200,12 +200,14 @@ router.post("/", (req, res) => {
       })  
   } else if (orderStatus == "start-handling"){
     
+    console.log("OrderId " + orderId + " Starting flow SMS... 💌");
+
     // This code is aimed to send a SMS to the user
     getOrderInfo(orderId)
       .then(orderInfo => {
           getProfileData(orderInfo.data)
             .then(userData => {
-              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");
+              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data for SMS.");
 
               // Obtain User data to send the SMS
               let user = userData.data;
@@ -274,15 +276,17 @@ router.post("/", (req, res) => {
                     })
 
                 } else {
+                  console.log("❗ Order: " + orderId + ". Error trying to find the pickup point. Close flow SMS.");
                   return res.json({
                     success: false,
                     message: "Order: " + orderId + ". Error trying to find the pickup point"
                   })
                 }
               } else {
+                console.log("❗ Order: " + orderId + ". This is not a pickup point. Close flow SMS.");
                 return res.json({
                   success: false,
-                  message: "Order: " + orderId + ". This is not a pickup point;."
+                  message: "Order: " + orderId + ". This is not a pickup point."
                 })
               }
 
