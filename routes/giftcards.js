@@ -198,7 +198,7 @@ router.post("/", (req, res) => {
           message: "CANCELING Order: " + orderId + " could not be verified."
         });
       })  
-  } else if (orderStatus == "start-handling"){
+  } else if (orderStatus == "invoiced"){
     
     console.log("OrderId " + orderId + " Starting flow SMS... 💌");
 
