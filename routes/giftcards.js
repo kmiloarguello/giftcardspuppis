@@ -3,7 +3,10 @@ const router = express.Router();
 const request = require("request");
 const https = require("https");
 const axios = require('axios');
-var cron = require("node-cron");
+const cron = require("node-cron");
+const multer  =   require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const { errorGenerator } = require("../utils/curries");
 const { response } = require("express");
@@ -195,14 +198,188 @@ router.post("/", (req, res) => {
           message: "CANCELING Order: " + orderId + " could not be verified."
         });
       })  
+  } else if (orderStatus == "invoiced"){
+    
+    console.log("OrderId " + orderId + " Starting flow SMS... 💌");
+
+    // This code is aimed to send a SMS to the user
+    getOrderInfo(orderId)
+      .then(orderInfo => {
+          getProfileData(orderInfo.data)
+            .then(userData => {
+              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data for SMS.");
+
+              // Obtain User data to send the SMS
+              let user = userData.data;
+              let phoneNumber = null;
+              let firstName = userData.data.firstName;
+              let address = null; // The addres where the user must be pick up the products
+              let storeName = null;
+
+              // If the cellphone exists... use it
+              if (!/null/ig.test(user.cellPhone)) {
+                phoneNumber = user.cellPhone;
+
+              // If the homeophone exists... use it
+              } else if(!/null/ig.test(user.homePhone)) {
+                phoneNumber = user.homePhone;
+
+                // There is not available phone
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Order: " + orderId + ". The user has not a valid phone number."
+                })
+              }
+
+              // check if phone number has +57 at the very begining
+              // The goal is to having phone numbers like +573123456789
+              if (/\+57/i.test(phoneNumber)) {
+                // continue
+
+              // If the phone has the 57 but not the +
+              } else if(!/\+/i.test(phoneNumber) && /573*/i.test(phoneNumber)){
+                phoneNumber = "+" + phoneNumber;
+
+                // If the phone does not have the +57
+              } else {
+                // add the +57
+                phoneNumber = "+57" + phoneNumber;
+              }
+
+              // Get information about store to pick up 
+              let { logisticsInfo } = orderInfo.data.shippingData;
+              
+              // This message is only made when the user has a pickup point
+              if(/retiro/ig.test(logisticsInfo[0].selectedSla) || /recoge/ig.test(logisticsInfo[0].selectedSla)) {
+
+                // Do not send SMS for Pickit points
+                if(/Pickit/ig.test(logisticsInfo[0].selectedSla)) {
+                  console.log("👮‍♀️ Order: " + orderId + ". The SMS is only sent with a Puppis pickup Point, not with Pickit.");
+                  return res.json({
+                    success: false,
+                    message: "The SMS is only sent with a Puppis pickup Point, not with Pickit."
+                  })
+                }
+
+                address = logisticsInfo[0].pickupStoreInfo.address.street + logisticsInfo[0].pickupStoreInfo.address.number;
+                storeName = logisticsInfo[0].pickupStoreInfo.friendlyName;
+
+                sendASMS(firstName, phoneNumber, storeName, address)
+                  .then(() => {
+                    console.log("✅ Message sent to " + phoneNumber);
+                    // Sending the SMS
+                    res.json({
+                      success: true,
+                      message: "The SMS has been sent successfully to the phone number " + phoneNumber
+                    })
+                  })
+                  .catch(error => {
+                    console.log("❗ Error sending the LOG information to MD", error);
+                    return res.json({
+                      success: false,
+                      message: "Order: " + orderId + ". There was an error sending the SMS"
+                    })
+                  })
+
+              } else {
+                console.log("❗ Order: " + orderId + ". This is not a pickup point. Close flow SMS.");
+                return res.json({
+                  success: false,
+                  message: "Order: " + orderId + ". This is not a pickup point."
+                })
+              }
+
+
+            })
+            .catch(error => {
+              console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error on User profile Data."
+              });
+            });
+      })
+      .catch(error => {
+        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        return res.json({
+          success: false,
+          message: "Order: " + orderId + " could not be verified."
+        });
+      })
   } else {
     return res.json({
       success: false
     });
   }
+
+  
  
 });
 
+
+router.post("/sms", (req, res) => {
+  console.log("THE BODY IS", req.body);
+  
+  let orderId = req.body.orderId;
+  let orderStatus = req.body.status;
+
+  getOrderInfo(orderId)
+      .then(orderInfo => {
+          getProfileData(orderInfo.data)
+            .then(userData => {
+              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");           
+              res.json({
+                userData
+              })
+            })
+            .catch(error => {
+              console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error on User profile Data."
+              });
+            });
+      })
+      .catch(error => {
+        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        return res.json({
+          success: false,
+          message: "Order: " + orderId + " could not be verified."
+        });
+      })
+});
+
+
+router.get('/download', async (req, res) => {
+
+  let { query } = req;
+
+  if (Object.keys(query).length == 0 || !/pdf/ig.test(Object.keys(query)[0]) ) {
+    res.sendStatus(400);
+    return;
+  }
+
+  let pdfToSearch = query.pdf;
+
+  fs.readdir(path.resolve(".") +'/uploads', function (err, files) {
+    if (err) {
+      console.log(err);
+      res.sendStatus(400);
+      return;
+    }
+
+    const foundFiles = files.filter(file => new RegExp(pdfToSearch, "ig").test(file) );
+
+    if (foundFiles.length > 0) {
+      const file = foundFiles[0];
+      res.download(path.resolve(".") +'/uploads/' + file, file);
+    } else {
+      res.sendStatus(404);
+    }
+
+  });
+});
 
 
 
@@ -224,9 +401,7 @@ const getGiftcardValue = (order) => {
   if (typeof items != "object" || items.length == 0) return console.log("items is undefined");
 
   let giftCardProducts = items.filter(item => {
-    //console.log("item", item.name)
-    // TODO: VERIFY WHEN IS A GIFTCARD
-    if (/tarjeta/ig.test(item.name)) {
+    if (/tarjeta/ig.test(item.name) && /regalo/ig.test(item.name)) {
       return item.price;
     }
   });
@@ -387,6 +562,26 @@ const getGiftCardDetailsFromMD = (orderId) => {
 }
 
 
+
+const sendASMS = (username, phone, storeName, address) => {
+
+  const messageWithAddress = `Hola ${username}, Tu pedido online está listo para ser recogido en la tienda ${storeName} ${address} Recuerda presentar tu documento de identidad y el correo de pedido facturado. `;
+  
+  let message = messageWithAddress;
+
+
+  const smsData = {  
+    from: "Puppis Colombia",
+    to: phone,
+    text: message
+ }
+
+  return axios.post("http://api.messaging-service.com/sms/1/text/single", smsData, {
+    headers: {
+      'Authorization': `Basic ${process.env.TOKEN_SMS}`
+    }
+  });
+}
 
 
 module.exports = router;
