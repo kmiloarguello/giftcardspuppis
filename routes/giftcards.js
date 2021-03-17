@@ -214,6 +214,7 @@ router.post("/", (req, res) => {
               let phoneNumber = null;
               let firstName = userData.data.firstName;
               let address = null; // The addres where the user must be pick up the products
+              let storeName = null;
 
               // If the cellphone exists... use it
               if (!/null/ig.test(user.cellPhone)) {
@@ -250,38 +251,37 @@ router.post("/", (req, res) => {
               let { logisticsInfo } = orderInfo.data.shippingData;
               
               // This message is only made when the user has a pickup point
-              if(/retiro/ig.test(logisticsInfo[0].selectedSla)) {
-                let logisticPointInfo = logisticsInfo[0].slas.filter(sla => logisticsInfo[0].selectedSla == sla.name);
+              if(/retiro/ig.test(logisticsInfo[0].selectedSla) || /recoge/ig.test(logisticsInfo[0].selectedSla)) {
 
-                if (logisticPointInfo.length > 0) {
-                  // Getting the address
-                  address = logisticPointInfo[0].pickupStoreInfo.address.street;
-
-                  console.log("⏳ Sending a SMS to the number " + phoneNumber + " ...");
-                  sendASMS(firstName, phoneNumber, address)
-                    .then(() => {
-                      console.log("✅ Message sent to " + phoneNumber);
-                      // Sending the SMS
-                      res.json({
-                        success: true,
-                        message: "The SMS has been sent successfully to the phone number " + phoneNumber
-                      })
-                    })
-                    .catch(error => {
-                      console.log("❗ Error sending the LOG information to MD", error);
-                      return res.json({
-                        success: false,
-                        message: "Order: " + orderId + ". There was an error sending the SMS"
-                      })
-                    })
-
-                } else {
-                  console.log("❗ Order: " + orderId + ". Error trying to find the pickup point. Close flow SMS.");
+                // Do not send SMS for Pickit points
+                if(/Pickit/ig.test(logisticsInfo[0].selectedSla)) {
+                  console.log("👮‍♀️ Order: " + orderId + ". The SMS is only sent with a Puppis pickup Point, not with Pickit.");
                   return res.json({
                     success: false,
-                    message: "Order: " + orderId + ". Error trying to find the pickup point"
+                    message: "The SMS is only sent with a Puppis pickup Point, not with Pickit."
                   })
                 }
+
+                address = logisticsInfo[0].pickupStoreInfo.address.street + logisticsInfo[0].pickupStoreInfo.address.number;
+                storeName = logisticsInfo[0].pickupStoreInfo.friendlyName;
+
+                sendASMS(firstName, phoneNumber, storeName, address)
+                  .then(() => {
+                    console.log("✅ Message sent to " + phoneNumber);
+                    // Sending the SMS
+                    res.json({
+                      success: true,
+                      message: "The SMS has been sent successfully to the phone number " + phoneNumber
+                    })
+                  })
+                  .catch(error => {
+                    console.log("❗ Error sending the LOG information to MD", error);
+                    return res.json({
+                      success: false,
+                      message: "Order: " + orderId + ". There was an error sending the SMS"
+                    })
+                  })
+
               } else {
                 console.log("❗ Order: " + orderId + ". This is not a pickup point. Close flow SMS.");
                 return res.json({
@@ -563,23 +563,19 @@ const getGiftCardDetailsFromMD = (orderId) => {
 
 
 
-const sendASMS = (username, phone, address) => {
+const sendASMS = (username, phone, storeName, address) => {
 
-  const messageWithAddress = `Hola ${username}, tu pedido de Puppis está listo para ser entregado. Acercate a nuestro punto recogida Puppis. Dirección: ${address} `;
-  const messaWithoutAddress = `Hola ${username}, tu pedido de Puppis está listo para ser entregado. Acercate a tu tienda Puppis mas cercana.`;
+  const messageWithAddress = `Hola ${username}, Tu pedido online está listo para ser recogido en la tienda ${storeName} ${address} Recuerda presentar tu documento de identidad y el correo de pedido facturado. `;
   
   let message = messageWithAddress;
 
-  if (!address) {
-    message = messaWithoutAddress;
-  }
 
   const smsData = {  
     from: "Puppis Colombia",
     to: phone,
     text: message
  }
-  
+
   return axios.post("http://api.messaging-service.com/sms/1/text/single", smsData, {
     headers: {
       'Authorization': `Basic ${process.env.TOKEN_SMS}`
