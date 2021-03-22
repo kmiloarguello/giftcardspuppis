@@ -10,13 +10,13 @@
 </head>
 <body>
   <div class="container">
-    <h1>File Upload</h1>
-    <%= typeof msg != 'undefined' ? msg : '' %>
-    <form action="/owners/upload-photo" method="POST" enctype="multipart/form-data">
+
+    <h1 style="font-size: 1.2em;">File Upload</h1>
+    <form action="/api/upload" method="POST" enctype="multipart/form-data">
       <div class="file-field input-field">
         <div class="btn grey">
           <span>File</span>
-          <input name="ownerprofilepic" type="file">
+          <input name="tutorialpdf" type="file">
         </div>
         <div class="file-path-wrapper">
           <input class="file-path validate" type="text">
@@ -24,8 +24,23 @@
       </div>
       <button type="submit" class="btn">Submit</button>
     </form>
-    <br>
-    <img src="<%= typeof file != 'undefined' ? file : '' %>" class="responsive-img">
+    <br />
+    <br />
+    <table style="display: <%= typeof filename != 'undefined' ? 'block': 'none' %>; ">
+      <thead>
+        <tr>
+            <th>Archivo</th>
+            <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td><%= typeof filename != 'undefined' ? filename: '' %></td>
+          <td><a href="/api/download?pdf=<%= typeof filename != 'undefined' ? filename: '' %>" class="waves-effect waves-light btn">Descargar</a></td>
+        </tr> 
+      </tbody>
+    </table>
   </div>
 
   <script
