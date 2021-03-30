@@ -353,12 +353,20 @@ router.get('/download', async (req, res) => {
 
 
 router.get("/upload-pdf", (_, res) => {
-  res.render("load_pdf");
+  res.json({
+    success: false
+  })
+  //res.render("load_pdf");
 });
 
 
 
 router.post('/upload', (req, res) => {
+
+  res.json({
+    success: false
+  })
+  /*
 
   const { e400, presetE400 } = errorGenerator(res);
 
@@ -373,7 +381,7 @@ router.post('/upload', (req, res) => {
     filename = filename.split(`\\`)[1];
 
     res.render('load_pdf', { filename });
-  });
+  });*/
 });
 
 
