@@ -11,17 +11,22 @@
 <body>
     <main id="main-page">
         <div class="container-image">
-            <img src="../img/astronaute.png" alt="Astronauta 404" />
+            <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" />
         </div>
         <div class="container-main-text">
-            <h1>This Page is Lost in Space</h1>
-            <p>Contact to the administrator.</p>
+            <h1>&#128540; ¡Ups! &#128517;</h1>
+            <br />
+            <p>Si llegaste a este link por error te invitamos a que regreses al home de <b>Puppis</b>, haciendo click <a href="https://www.puppis.com.co">aquí</a></p>
+            <br />
+            <p><small>Te redigiremos en algunos segundos...</small></p>
         </div>
-        <div class="details-message">
-            <h3><%= message %></h3>
-            <h4><%= error.status %></h4>
-            <pre><%= error.stack %></pre>
-        </div>
+        <br />
+        <br />
     </main>
+    <script type="text/javascript">
+        setTimeout(() => {
+            window.location.href = "https://www.puppis.com.co"
+        }, 20000);
+    </script>
 </body>
 </html>
