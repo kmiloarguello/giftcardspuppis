@@ -568,7 +568,7 @@ const getGiftCardDetailsFromMD = (orderId) => {
 
 const sendASMS = (username, phone, storeName, address) => {
 
-  const messageWithAddress = `Puppis: Tu pedido online esta listo para ser recogido en ${storeName} ${address}. Recuerda presentar tu identificacion y el correo de pedido facturado.`;
+  const messageWithAddress = `Puppis: Tu pedido online esta listo para ser recogido en ${storeName}. Recuerda presentar tu identificacion y el correo de pedido facturado.`;
   let message = messageWithAddress;
 
 
