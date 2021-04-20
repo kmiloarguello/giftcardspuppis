@@ -11,18 +11,22 @@
 <body>
     <main id="main-page">
         <div class="container-image">
-            <img src="../img/sm-dog-homework.jpg" alt="Ups el perro se comió la tarea" />
+            <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" />
         </div>
         <div class="container-main-text">
-            <h1>&#128540; ¡El perro se comió la tarea! &#128517;</h1>
-            <br/>
-            <p>Si llegaste a este link por error te invitamos a que regreses al home de Puppis, haciendo click <a href="https://www.puppis.com.co">aquí</a></p>
+            <h1>&#128540; ¡Ups! &#128517;</h1>
+            <br />
+            <p>Si llegaste a este link por error te invitamos a que regreses al home de <b>Puppis</b>, haciendo click <a href="https://www.puppis.com.co">aquí</a></p>
+            <br />
+            <p><small>Te redigiremos en algunos segundos...</small></p>
         </div>
         <br />
-        <div class="details-message">
-            <h3><%= message %></h3>
-            <h4><%= error.status %></h4>
-        </div>
+        <br />
     </main>
+    <script type="text/javascript">
+        setTimeout(() => {
+            window.location.href = "https://www.puppis.com.co"
+        }, 20000);
+    </script>
 </body>
 </html>
