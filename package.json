@@ -7,7 +7,8 @@
     "test": "mocha",
     "dev-win": "set DEBUG=giftcards-puppisco & nodemon app.js",
     "dev": "DEBUG=giftcards-puppisco:server:* nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "stop": "killall node"
   },
   "author": "Puppis Colombia",
   "license": "MIT",
