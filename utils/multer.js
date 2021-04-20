@@ -9,7 +9,7 @@ const path = require("path");
 const fs = require("fs");
 
 const storage = multer.diskStorage({
-    destination: './public/uploads/',
+    destination: 'uploads/',
     filename: function(req, file, callback){
       callback(null,file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
@@ -17,18 +17,16 @@ const storage = multer.diskStorage({
 
 
 const fileConstraints = (file, callback) => {
-  // Only allow images
-  const fileType = /jpeg|jpg|png|gif/;
-  // check extension i.e jpg
+  // Only allow pdfs
+  const fileType = /pdf/;
+  // check extension i.e pdf
   const extName = fileType.test(path.extname(file.originalname).toLowerCase());
-  // Check the MIME type i.e image/jpeg
-  const mimeType = fileType.test(file.mimetype);
 
-  if(extName && mimeType){
+  if(extName){
     // Sending the Error as NULL
     return callback(null, true);
   }else{
-    return callback("ERROR: Only images are allowed");
+    return callback("ERROR: Only pdfs are allowed");
   }
 }
   
@@ -42,27 +40,10 @@ const uploadOwner = multer({
     fileFilter: (req,file,callback) => {
       fileConstraints(file, callback);
     } 
-}).single('ownerprofilepic');
+}).single('tutorialpdf');
 
-const uploadUser = multer({ 
-  storage: storage,
-  limits: { fileSize: 1000000 },
-  fileFilter: (req,file,callback) => {
-    fileConstraints(file, callback);
-  } 
-}).single('userprofilepic');
-
-const uploadEstablishment = multer({ 
-  storage: storage,
-  limits: { fileSize: 1000000 },
-  fileFilter: (req,file,callback) => {
-    fileConstraints(file, callback);
-  } 
-}).array('establishmentpics');
 
 module.exports = {
-  uploadOwner,
-  uploadUser,
-  uploadEstablishment
+  uploadOwner
 }
   

@@ -10,6 +10,7 @@ const fs = require('fs');
 
 const { errorGenerator } = require("../utils/curries");
 const { response } = require("express");
+const { uploadOwner } = require("../utils/multer");
 
 axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercestable.com.br";
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
@@ -318,38 +319,6 @@ router.post("/", (req, res) => {
 });
 
 
-router.post("/sms", (req, res) => {
-  console.log("THE BODY IS", req.body);
-  
-  let orderId = req.body.orderId;
-  let orderStatus = req.body.status;
-
-  getOrderInfo(orderId)
-      .then(orderInfo => {
-          getProfileData(orderInfo.data)
-            .then(userData => {
-              console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");           
-              res.json({
-                userData
-              })
-            })
-            .catch(error => {
-              console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
-              return res.json({
-                success: false,
-                message: "Order: " + orderId + ". Error on User profile Data."
-              });
-            });
-      })
-      .catch(error => {
-        console.log("❗ Order: " + orderId + " could not be verified.", error);
-        return res.json({
-          success: false,
-          message: "Order: " + orderId + " could not be verified."
-        });
-      })
-});
-
 
 router.get('/download', async (req, res) => {
 
@@ -379,6 +348,40 @@ router.get('/download', async (req, res) => {
     }
 
   });
+});
+
+
+
+router.get("/upload-pdf", (_, res) => {
+  res.json({
+    success: false
+  })
+  //res.render("load_pdf");
+});
+
+
+
+router.post('/upload', (req, res) => {
+
+  res.json({
+    success: false
+  })
+  /*
+
+  const { e400, presetE400 } = errorGenerator(res);
+
+  uploadOwner(req,res, (err) => {
+    if(err) return e400(err)();
+    if(req.file == undefined) return e400("INVALID")("There is not file to upload.");
+
+    const file = req.file;
+    const { path } = file;
+
+    let filename = path.split('uploads')[1];
+    filename = filename.split(`\\`)[1];
+
+    res.render('load_pdf', { filename });
+  });*/
 });
 
 
@@ -565,8 +568,7 @@ const getGiftCardDetailsFromMD = (orderId) => {
 
 const sendASMS = (username, phone, storeName, address) => {
 
-  const messageWithAddress = `Hola ${username}, Tu pedido online está listo para ser recogido en la tienda ${storeName} ${address} Recuerda presentar tu documento de identidad y el correo de pedido facturado. `;
-  
+  const messageWithAddress = `Puppis: Tu pedido online esta listo para ser recogido en ${storeName}. Recuerda presentar tu identificacion y el correo de pedido facturado.`;
   let message = messageWithAddress;
 
 
