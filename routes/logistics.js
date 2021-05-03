@@ -16,7 +16,6 @@ axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercest
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
-
 router.get("/get-pickup-by-city", (req, res) => {
 
     let { query } = req;
@@ -48,6 +47,46 @@ router.get("/get-pickup-by-city", (req, res) => {
  
 });
 
+
+router.get('/get-coords-by-address', (req, res) => {
+
+    let { query } = req;
+
+    if (Object.keys(query).length == 0 || !/address/ig.test(Object.keys(query)[0]) ) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let addressToSearch = query.address;
+    var apikey = process.env.OPENCAGEDATA;
+    var api_url = 'https://api.opencagedata.com/geocode/v1/json';
+
+    var request_url = api_url
+        + '?'
+        + 'key=' + apikey
+        + '&q=' + encodeURIComponent(addressToSearch)
+        + '&pretty=1'
+        + '&no_annotations=1';
+
+    axios.get(request_url)
+        .then(data => {
+            
+            let results = data.data.results;
+            let resultsInColombia = results.filter(result => result.components.country_code == "co");
+
+            res.json({
+                success: true,
+                results: resultsInColombia
+            });
+        })
+        .catch(err => {
+            console.log("ERROR", err)
+            res.status(500).json({
+                success: false
+            })
+        });
+
+});
 
 
 const getPickupPoints =  () => {
