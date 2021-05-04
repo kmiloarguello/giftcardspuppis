@@ -90,8 +90,22 @@ router.get('/get-coords-by-address', (req, res) => {
 
 
 router.get("/get-coords", (req, res) => {
+
+    let { query } = req;
+
+    if (Object.keys(query).length == 0 || !/address/ig.test(Object.keys(query)[0]) ) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let addressToSearch = query.address;
     const API = process.env.GOOGLEMAPSAPI;
-    axios.get("https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=" + API)
+    
+    let final_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURI(addressToSearch) + "&key=" + API;
+    
+    console.log("url::::  ", final_url)
+    
+    axios.get(final_url)
         .then(data => {
             res.json({
                 success: true,
