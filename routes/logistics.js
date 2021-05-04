@@ -89,6 +89,24 @@ router.get('/get-coords-by-address', (req, res) => {
 });
 
 
+router.get("/get-coords", (req, res) => {
+    const API = process.env.GOOGLEMAPSAPI;
+    axios.get("https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=" + API)
+        .then(data => {
+            res.json({
+                success: true,
+                data: data.data
+            })
+        })
+        .catch(error => {
+            res.status(500).json({
+                success: false,
+                error
+            })
+        })
+    // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=YOUR_API_KEY
+});
+
 const getPickupPoints =  () => {
     console.log("⏳ Getting logistics... ");
     return axios.get("/api/logistics/pvt/configuration/pickuppoints/_search");
