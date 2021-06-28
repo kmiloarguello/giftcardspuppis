@@ -19,6 +19,8 @@ axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKE
 
 router.post("/", (req, res) => {
 
+  console.log("Getting api..............");
+
   let orderId = req.body.OrderId;
   let orderStatus = req.body.State;
 
