@@ -7,8 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('giftcards-puppisco:server');
 var http = require('http');
-let privateKey  = fs.readFileSync('private.key', 'utf8');
-let certificate = fs.readFileSync('certificate.crt', 'utf8');
+let privateKey  = fs.readFileSync('key.pem', 'utf8');
+let certificate = fs.readFileSync('cert.pem', 'utf8');
 let credentials = {key: privateKey, cert: certificate};
 
 

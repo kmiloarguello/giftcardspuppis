@@ -8,3 +8,4 @@ _backup/
 Design/
 *.key
 *.crt
+*.pem
