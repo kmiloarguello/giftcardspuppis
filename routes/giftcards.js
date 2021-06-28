@@ -16,13 +16,7 @@ axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercest
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
-router.get("/ca", (req, res) => {
-  res.json("Hey there!");
-})
-
 router.post("/", (req, res) => {
-
-  console.log("Getting api..............");
 
   let orderId = req.body.OrderId;
   let orderStatus = req.body.State;
