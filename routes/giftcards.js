@@ -98,7 +98,7 @@ router.post("/", (req, res) => {
         }
       })
       .catch(error => {
-        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        console.log("❗ Order: " + orderId + " could not be verified.");
         createLogGiftCardinMD(orderId, "Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
@@ -191,7 +191,7 @@ router.post("/", (req, res) => {
           })
       })
       .catch(error => {
-        console.log("❗ CANCELING Order: " + orderId + " could not be verified.", error);
+        console.log("❗ CANCELING Order: " + orderId + " could not be verified.");
         createLogGiftCardinMD(orderId, "CANCELING Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
@@ -301,7 +301,7 @@ router.post("/", (req, res) => {
             });
       })
       .catch(error => {
-        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        console.log("❗ Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
           message: "Order: " + orderId + " could not be verified."
