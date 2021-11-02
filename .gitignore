@@ -6,3 +6,6 @@ config/keys.js
 .env.prod
 _backup/
 Design/
+*.key
+*.crt
+*.pem

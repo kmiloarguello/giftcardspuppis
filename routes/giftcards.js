@@ -16,7 +16,6 @@ axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercest
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
-
 router.post("/", (req, res) => {
 
   let orderId = req.body.OrderId;
@@ -99,7 +98,7 @@ router.post("/", (req, res) => {
         }
       })
       .catch(error => {
-        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        console.log("❗ Order: " + orderId + " could not be verified.");
         createLogGiftCardinMD(orderId, "Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
@@ -192,7 +191,7 @@ router.post("/", (req, res) => {
           })
       })
       .catch(error => {
-        console.log("❗ CANCELING Order: " + orderId + " could not be verified.", error);
+        console.log("❗ CANCELING Order: " + orderId + " could not be verified.");
         createLogGiftCardinMD(orderId, "CANCELING Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
@@ -214,7 +213,7 @@ router.post("/", (req, res) => {
               let user = userData.data;
               let phoneNumber = null;
               let firstName = userData.data.firstName;
-              let storeAddress = null; // The addres where the user must be pick up the products
+              let address = null; // The addres where the user must be pick up the products
               let storeName = null;
 
               // If the cellphone exists... use it
@@ -263,67 +262,25 @@ router.post("/", (req, res) => {
                   })
                 }
 
-                storeAddress = logisticsInfo[0].pickupStoreInfo.address.street + logisticsInfo[0].pickupStoreInfo.address.number;
+                address = logisticsInfo[0].pickupStoreInfo.address.street + logisticsInfo[0].pickupStoreInfo.address.number;
                 storeName = logisticsInfo[0].pickupStoreInfo.friendlyName;
 
-                let textMessage = `Puppis: Tu pedido online esta listo para ser recogido en ${storeName}. Recuerda presentar tu identificacion y el correo de pedido facturado.`;
-                
-                const smsInfo = { orderId, 
-                                  date: new Date().toISOString(),
-                                  phoneNumber,
-                                  storeAddress,
-                                  storeName,
-                                  textMessage,
-                                  userName: firstName
-                                  };
-
-                // CHeck there is not SMS in MD
-                getSMSDetailsFromMD(orderId)
-                  .then(smsMD => {
-                    
-                    // If the message exists at Master Data, it is because it has already been sent.
-                    if (smsMD.data.length == 0 || typeof smsMD == "undefined") {
-                      
-                      // Sending the SMS
-                      sendASMS(smsInfo)
-                        .then(() => {
-                          console.log("✅ Message sent to " + phoneNumber);
-
-                          // Updating MD information with SMS
-                          createLogSMSinMD(smsInfo)
-                            .then(() => {
-                              console.log("✅ OrderId: "+orderId+" LOG SMS information has been sent to Vtex.")
-                              return res.json({
-                                success: true,
-                                message: "The SMS has been sent successfully to the phone number " + phoneNumber
-                              })
-                            })
-                            .catch(error => {
-                              console.log("❗ Error sending the LOG information to MD", error);
-                              return res.json({
-                                success: false,
-                                message: "Order: " + orderId + ". There was an error sending the SMS"
-                              })
-                            })
-                          
-                        })
-                        .catch(error => {
-                          console.log("❗ Error sending the SMS", error);
-                          return res.json({
-                            success: false,
-                            message: "Order: " + orderId + ". There was an error sending the SMS"
-                          })
-                        })
-                    }else {
-                      // The message was already sent
-                      console.log("👮‍♀️ The SMS for the orderId: " + orderId + " has already been sent.");
-                      return res.json({
-                        success: false,
-                        message: "Order: " + orderId + ". The SMS has already been sent."
-                      })
-                    }
+                sendASMS(firstName, phoneNumber, storeName, address)
+                  .then(() => {
+                    console.log("✅ Message sent to " + phoneNumber);
+                    // Sending the SMS
+                    res.json({
+                      success: true,
+                      message: "The SMS has been sent successfully to the phone number " + phoneNumber
+                    })
                   })
-                
+                  .catch(error => {
+                    console.log("❗ Error sending the LOG information to MD", error);
+                    return res.json({
+                      success: false,
+                      message: "Order: " + orderId + ". There was an error sending the SMS"
+                    })
+                  })
 
               } else {
                 console.log("❗ Order: " + orderId + ". This is not a pickup point. Close flow SMS.");
@@ -344,7 +301,7 @@ router.post("/", (req, res) => {
             });
       })
       .catch(error => {
-        console.log("❗ Order: " + orderId + " could not be verified.", error);
+        console.log("❗ Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
           message: "Order: " + orderId + " could not be verified."
@@ -607,32 +564,22 @@ const getGiftCardDetailsFromMD = (orderId) => {
 }
 
 
-const createLogSMSinMD = (smsInformation) => {
-  return axios.post("/api/dataentities/SS/documents", smsInformation);
-}
 
-const getSMSDetailsFromMD = (orderId) => {
-  console.log("⏳ From Order: " + orderId + "💳 Getting SMS from MD.");
-  return axios.get("/api/dataentities/SS/search?orderId=" + orderId + "&_fields=_all");
-}
+const sendASMS = (username, phone, storeName, address) => {
 
-
-const sendASMS = (smsInformation) => {
-
-  let { phoneNumber, textMessage } = smsInformation; 
+  const message = `Puppis: Tu pedido online esta listo para ser recogido en ${storeName} - ${address}. Recuerda presentar tu identificacion y el correo de pedido facturado.`;
 
   const smsData = {  
     from: "Puppis Colombia",
-    to: phoneNumber,
-    text: textMessage
-  }
+    to: phone,
+    text: message
+ }
 
   return axios.post("http://api.messaging-service.com/sms/1/text/single", smsData, {
     headers: {
       'Authorization': `Basic ${process.env.TOKEN_SMS}`
     }
   });
-
 }
 
 
