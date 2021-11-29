@@ -465,18 +465,20 @@ const creatingGiftNewGiftCard = (recipientData, giftCardValue, expiringDate) => 
 
   console.log("⏳ Creating gift Card 💳 ...");
 
+  let cardNameData = recipientData.recipientCC + "_" + new Date().toISOString();
+
   let giftCardData = {
-    customerId: recipientData.recipientEmail, // The giftcard will always be attached to this user
+    profileId: recipientData.recipientEmail, // The giftcard will always be attached to this user
+    relationName: cardNameData,
+    cardName: cardNameData,
     expiringDate,
-    balance: giftCardValue,
-    cardName: recipientData.recipientCC,
     caption: "Tarjeta-por-" + parseInt(giftCardValue) / 100 + "cliente-" + recipientData.recipientCC,
     multipleCredits: false,
-    multipleRedemptions: true,
+    multipleRedemptions: false,
     restrictedToOwner: true
   }
 
-  return axios.post("/api/gift-card-system/pvt/giftCards", giftCardData);
+  return axios.post("/api/giftcards", giftCardData);
 }
 
 
@@ -488,7 +490,11 @@ const assignValueNewGiftCard = (giftcard, giftCardValue) => {
     value: parseInt(giftCardValue),
   }
 
-  const id = giftcard.id;
+  if ( !/_/ig.test(giftcard.id) ) return false;
+
+  let contentId = giftcard.id;
+  let splitContent = contentId.split("_");
+  const id = splitContent[splitContent.length - 1];
 
   console.log("⏳ Giving value to gift Card #" + id + " 💳 ...");
 
