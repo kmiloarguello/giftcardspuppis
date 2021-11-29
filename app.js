@@ -11,7 +11,7 @@ const cors = require('cors');
 
 //import routes
 const giftcards = require('./routes/giftcards');
-const logistics = require('./routes/logistics');
+//const logistics = require('./routes/logistics');
 
 const app = express();app.use(cors());
 
@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 
 // Use routes
 app.use('/api', giftcards);
-app.use('/logistics', logistics);
+//app.use('/logistics', logistics);
 
 // Tasks
 //require('./utils/tasks');
