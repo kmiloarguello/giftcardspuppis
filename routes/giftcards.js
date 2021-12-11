@@ -25,6 +25,7 @@ router.post("/", (req, res) => {
 
     getOrderInfo(orderId)
       .then(orderInfo => {
+
         let giftcardValue = getGiftcardValue(orderInfo.data);
         
         // It is a valid griftcard product
@@ -91,22 +92,43 @@ router.post("/", (req, res) => {
               });
             });
         } else {
-          return res.json({
-            success: false,
-            message: "This is not a valid Giftcard product"
-          });
+
+          // Flow for Update MD with Subscription Information
+          const isAutocompra = hasShippingMethod(orderInfo.data, "Autocompra");
+          const hasSubscriptionAttach = hasSubscriptionAttachment(orderInfo.data);
+
+          if (isAutocompra && hasSubscriptionAttach) {
+            createMDSubscription(orderInfo.data)
+            .then(() => {
+              console.log("✅ Order: " + orderInfo.data.orderId + " has been sent it back the info to Vtex. EXIT.");
+              return res.json({
+                success: true,
+                message: "Subscription successfully created",
+              });
+            })
+            .catch(error => {
+              console.log("❗ Order: " + orderId + ". Error saving the new Subscription in Master Data.", error);
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error saving the new Subscription in Master Data."
+              });
+            });
+          } else {
+            return res.json({
+              success: false,
+              message: "This is not a valid Giftcard product"
+            });
+          }
         }
       })
-      .catch(error => {
+      .catch(() => {
         console.log("❗ Order: " + orderId + " could not be verified.");
         createLogGiftCardinMD(orderId, "Order: " + orderId + " could not be verified.");
         return res.json({
           success: false,
           message: "Order: " + orderId + " could not be verified."
         });
-      })
-
-    
+      });
 
   } else if (orderStatus == "canceled") {
 
@@ -389,6 +411,58 @@ const getOrderInfo =  (orderId) => {
   console.log("⏳ Verifying order... " + orderId);
   return axios.get("/api/oms/pvt/orders/" + orderId);
 }
+
+
+/**
+ * @desc  This function returns true if the shipping method selected is the same as the given as parameter
+ * @param {object} order 
+ * @param {string} shippingMethod Shipping method to search for
+ * @returns {boolean}
+ */
+const hasShippingMethod = (order, shippingMethod = "Autocompra") => {
+  let { logisticsInfo } = order.shippingData;
+  
+  return logisticsInfo.some(logistic => logistic.selectedSla == shippingMethod);
+}
+
+/**
+ * @desc  This function returns true if the order contains a subscription attachement
+ *        - It includes farmat and assinatura
+ * @param {object} order 
+ * @returns {boolean}
+ */
+const hasSubscriptionAttachment = (order) => {
+  let { items } = order;
+
+  return items.some(item => {
+    if (item.attachments.length > 0) {
+      return item.attachments.some(attach => /assinatura/ig.test(attach.name) || /farmat/ig.test(attach.name)  )
+    } else {
+      return false;
+    }
+  });
+
+}
+
+/**
+ * @desc  This function updates the MD with information of Subscription
+ * @param {*} order 
+ * @returns {Promise}
+ */
+const createMDSubscription = (order) => {
+
+  const _subscriptionData = {
+    aceptSuscription  : true,
+    date              : order.creationDate,
+    email             : order.clientProfileData.email,
+    orderId           : order.orderId
+  };
+
+  console.log("⏳ Sending the info to Vtex... 💳 ...");
+
+  return axios.post("/api/dataentities/CS/documents", _subscriptionData);
+}
+
 
 
 /**
