@@ -75,8 +75,8 @@ router.post("/", (req, res) => {
                     });
                 })
                 .catch(error => {
-                  console.log("❗ Order: " + orderId + ". Error trying to create a giftcard.", error);
-                  createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard.");
+                  console.log("❗ Order: " + orderId + ". Error trying to create a giftcard. ", error.message + ", data: " + error.config.data );
+                  createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard. " + error.message + ", data: " + error.config.data );
                   return res.json({
                     success: false,
                     message: "Order: " + orderId + ". Error trying to create a giftcard."
@@ -540,9 +540,10 @@ const creatingGiftNewGiftCard = (recipientData, giftCardValue, expiringDate) => 
   console.log("⏳ Creating gift Card 💳 ...");
 
   let cardNameData = recipientData.recipientCC + "_" + new Date().toISOString();
+  let email = recipientData.recipientEmail.toLowerCase();
 
   let giftCardData = {
-    profileId: recipientData.recipientEmail, // The giftcard will always be attached to this user
+    profileId: email, // The giftcard will always be attached to this user
     relationName: cardNameData,
     cardName: cardNameData,
     expiringDate,
@@ -580,12 +581,14 @@ const assignValueNewGiftCard = (giftcard, giftCardValue) => {
 
 const createMDGiftCards = (orderId, userData, recipientData, giftCardData, statusGiftCard = "payment-approved") => {
 
+  let email = recipientData.recipientEmail.toLowerCase();
+
   const _giftCardFinalData = {
     balance: String(parseInt(giftCardData.balance) / 100),
     expiringDate: giftCardData.expiringDate,
     giftcardId: String(giftCardData.id),
     orderId,
-    recipientEmail: recipientData.recipientEmail,
+    recipientEmail: email,
     recipientCC: recipientData.recipientCC,
     recipientName: recipientData.recipientName,
     redemptionCode: giftCardData.redemptionCode,
