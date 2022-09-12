@@ -9,6 +9,7 @@ const cors = require('cors');
 
 //import routes
 const giftcards = require('./routes/giftcards.routes');
+const orders = require('./routes/orders.routes');
 //const logistics = require('./routes/logistics.routes');
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(bodyParser.json());
 
 // Use routes
 app.use('/api', giftcards);
+app.use('/api/orders',orders);
 //app.use('/logistics', logistics);
 
 // Tasks
