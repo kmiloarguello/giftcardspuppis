@@ -8,9 +8,9 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 //import routes
-const giftcards = require('./routes/giftcards.routes');
-const orders = require('./routes/orders.routes');
-const logistics = require('./routes/logistics.routes');
+const giftcardsRouter = require('./routes/giftcards.routes');
+const ordersRouter = require('./routes/orders.routes');
+const logisticsRouter = require('./routes/logistics.routes');
 
 const app = express();
 app.use(cors());
@@ -31,9 +31,9 @@ app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 
 // Use routes
-app.use('/api', giftcards);
-app.use('/api/orders',orders);
-app.use('/api/logistics', logistics);
+app.use('/api', giftcardsRouter);
+app.use('/api/orders',ordersRouter);
+app.use('/api/logistics', logisticsRouter);
 
 // Tasks
 //require('./jobs/insider.job');
@@ -50,9 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+app.use((req, res, next) => next(createError(404)) );
 
 // error handler
 app.use(function(err, req, res, next) {
