@@ -88,4 +88,18 @@ main#main-page{
 .details-message pre{
     font-size: .8em;
 }
+.container-error {
+    font-size: 0;
+    background-color: white;
+    border: 1px solid #fafafa;
+    border-radius: 10px;
+    margin: 10px auto;    
+}
+
+.container-error p {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    padding: 10px;
+    color: black; 
+}
 

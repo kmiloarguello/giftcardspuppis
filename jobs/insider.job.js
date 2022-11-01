@@ -6,16 +6,16 @@ axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercest
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
-const dailyCron = "0 0 * * *"; // everyday at 00:00
-const minuteCron = "* * * * * *";
+const dailyCron = "0 1 * * *"; // everyday at 00:00
+const minuteCron = "* * * * *"; // To test
 
-cron.schedule(minuteCron, () => {
+cron.schedule(dailyCron, () => {
     // Data to write on file
     let data = `${new Date().toUTCString()} : Server is working\n`;
       
     // Appending data to logs.txt file
     fs.appendFile("./logs/logs.txt", data, function(err) {
         if (err) throw err;
-        console.log("Status Logged!");
+        //console.log("Status Logged!");
     });
 });

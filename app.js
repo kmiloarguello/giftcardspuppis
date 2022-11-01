@@ -11,6 +11,7 @@ const cors = require('cors');
 const giftcardsRouter = require('./routes/giftcards.routes');
 const ordersRouter = require('./routes/orders.routes');
 const logisticsRouter = require('./routes/logistics.routes');
+const comerssiaRouter = require('./routes/comerssia.routes');
 
 const app = express();
 app.use(cors());
@@ -34,9 +35,10 @@ app.use(bodyParser.json());
 app.use('/api', giftcardsRouter);
 app.use('/api/orders',ordersRouter);
 app.use('/api/logistics', logisticsRouter);
+app.use('/api/comerssia', comerssiaRouter);
 
 // Tasks
-//require('./jobs/insider.job');
+require('./jobs/insider.job');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'public/views'));
