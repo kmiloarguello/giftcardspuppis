@@ -1,9 +1,9 @@
 const ComerssiaDB = require("../database/comerssia.db");
 const sql = require('mssql');
 const createError = require('http-errors');
-const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
 const axios = require('axios');
-
+const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
+const { transformObjectInsider, getPhoneNumber } = require("../utils/insider.utils");
 
 exports.getOrders = (req, res, next) => {
 
@@ -39,26 +39,29 @@ exports.getOrders = (req, res, next) => {
             THEN 'ONLINE'
             ELSE 'OFFLINE'
         END AS 
-                Origen,
-                ITE.REFCodigo1 AS 'REFProductID',
-                ITE.REFNombreLargo,
-                ITE.IRFBruto,
-                ITE.IRFVenta,
-                ITE.IRFDescuento,
-                ITE.IRFInventario,
-                ITE.IRFCantidad,
-                CLI.CLICodigo, 
-                CLI.CLINombres, 
-                CLI.CLIApellidos,
-                CLI.CLIFechaNacimiento,
-                CLI.CLISexo,
-                CLI.CLIEmailPrincipal,
-                CLI.CLITelefonoCasa,
-                CLI.CLICelular
+            Origen,
+            ENC.ENCCodigo,
+            ITE.REFCodigo1,
+            RIN.RFICodigo,
+            ITE.REFNombreLargo,
+            ITE.IRFBruto,
+            ITE.IRFVenta,
+            ITE.IRFDescuento,
+            ITE.IRFInventario,
+            ITE.IRFCantidad,
+            CLI.CLICodigo, 
+            CLI.CLINombres, 
+            CLI.CLIApellidos,
+            CLI.CLIFechaNacimiento,
+            CLI.CLISexo,
+            CLI.CLIEmailPrincipal,
+            CLI.CLITelefonoCasa,
+            CLI.CLICelular
         FROM ${ComerssiaDB.config.dbName}.dbo.Encabezados ENC
         JOIN ItemsCapturas ICA ON ICA.ENCCodigo = ENC.ENCCodigo AND ICA.ICPLetra = 'CLI'
         LEFT JOIN ItemsReferencias ITE ON ITE.ENCCodigo = ENC.ENCCodigo
         JOIN Clientes CLI ON CLI.CLICodigo = ICA.ICPCadena
+        JOIN REFIntegraciones RIN ON RIN.REFCodigo1 = ITE.REFCodigo1
         JOIN Referencias ITM ON ITM.REFCodigo1 = ITE.REFCodigo1 
         WHERE 
             ENC.ENCFechaTrx BETWEEN '${dayStart}' AND '${dayEnd}'
@@ -102,14 +105,53 @@ exports.getProfile = (req, res, next) => {
 }
 
 exports.upsert = (req, res, next) => {
-    const users = [
-        {
-            identifiers : {
-                email: "",
-                uuid: "",
-                custom: ""
-            }
+
+    const insiderURL = process.env.INSIDER_UPSERT_URL;
+    const body = req.body;
+
+    const { users } = body;
+    if(!users || users.length == 0) return next(createError(400, "There is not users"));
+    
+    const { identifiers, attributes, events } = users[0]; 
+    if (!identifiers || !attributes || !events ) return next(createError(400, "There is not identifiers/attributes/events"));
+
+    const { email } = identifiers;
+    if (!email) return next(createError(400, "There is not email"));
+
+    if (Object.keys(attributes) == 0 || events.length == 0 || typeof events != "object") return next(createError(400, "There is not attributes/events"));
+    
+    const headers = {
+        headers: {
+            "X-PARTNER-NAME" : process.env.INSIDER_PARTNER,
+            "X-REQUEST-TOKEN" : process.env.INSIDER_API_KEY,
+            "Content-Type" : "application/json"
         }
-    ]
+    };
+
+    axios.post(insiderURL, JSON.stringify(body), headers)
+        .then(data => data.data)
+        .then(result => res.json(result))
+        .catch(err => next(createError(err)));
 }
 
+
+exports.updateInsiderFromComerssia = (req, res, next) => {
+    const { day_start, day_end, hour_start, hour_end, limit } = req.query;
+    
+    if (!day_start || !day_end || !hour_start || !hour_end || !limit) return next(createError(400));
+
+    const comerssiaURL = `${process.env.SERVER_HOST}/api/comerssia/?day_start=${day_start}&day_end=${day_end}&hour_start=${hour_start}&hour_end=${hour_end}&limit=${limit}`;
+    const insiderURL = `${process.env.SERVER_HOST}/api/comerssia/upsert`;
+    
+    axios.get(comerssiaURL)
+        .then(data => data.data)
+        .then(records => transformObjectInsider(records))
+        .then(records => {
+            axios.post(insiderURL, records)
+                .then(data => data.data)
+                .then(result => res.json({ input: records, result }))
+                .catch(err => next(createError(err)));
+        })
+        .catch(err => next(createError(err)));
+
+}
