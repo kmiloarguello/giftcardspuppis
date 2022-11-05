@@ -5,9 +5,15 @@ const getProductByRef =  (skuId) => {
     return axios.get("/api/catalog/pvt/product/" + skuId);
 }
 
+const getProductByURL = (url) => {
+    console.log("⏳ Verifying url... " + url);
+    return axios.get("/api/catalog_system/pub/products/search/" + url);
+}
+
 
 module.exports = {
-    getProductByRef
+    getProductByRef,
+    getProductByURL
 }
 
 

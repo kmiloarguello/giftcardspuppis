@@ -8,6 +8,7 @@ axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
 router.get("/:id", Catalog.getProductBySku );
+router.get("/url/:url", Catalog.searchProductByURL );
 
 module.exports = router;
 

@@ -145,12 +145,30 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
     
     axios.get(comerssiaURL)
         .then(data => data.data)
-        .then(records => transformObjectInsider(records))
         .then(records => {
-            axios.post(insiderURL, records)
-                .then(data => data.data)
-                .then(result => res.json({ input: records, result }))
+            const { recordset } = records;
+            const reqProductIDs = recordset.map(record => axios.get(`${process.env.SERVER_HOST}/api/catalog/${record.RFICodigo}`).then(data => data.data));
+            
+            Promise.all(reqProductIDs)
+                .then(vtexProducts => {
+
+                    const reqProducts = vtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(data => data.data));
+
+                    Promise.all(reqProducts)
+                        .then(products => products.filter(product => product.length > 0))
+                        .then(purchase => purchase.map(products => products.map(product => { return { productId: product.productId, categories: product.categories } })))
+                        .then(purchase => transformObjectInsider(records, purchase))
+                        .then(records => {
+                            axios.post(insiderURL, records)
+                                .then(data => data.data)
+                                .then(result => res.json({ input: records, result }))
+                                .catch(err => next(createError(err)));
+                        })
+                        .catch(err => next(createError(err)));
+                        
+                })
                 .catch(err => next(createError(err)));
+
         })
         .catch(err => next(createError(err)));
 

@@ -1,4 +1,4 @@
-const transformObjectInsider = (records) => {
+const transformObjectInsider = (records, purchase) => {
     if (!records) return console.error("🔴 Records is undefined");
 
     const { recordset } = records;
@@ -6,7 +6,17 @@ const transformObjectInsider = (records) => {
 
     let clientes = recordset.filter(user => user.CLIEmailPrincipal && user.CLIEmailPrincipal.length > 0);
     
+    const categories = purchase.map(p => { return { productId : p[0].productId, categories: p[0].categories } });
+
     const users = clientes.map(client => {
+
+        let taxonomy = [];
+
+        categories.map(cat => {
+            if (cat.productId == client.RFICodigo) {
+                taxonomy.push(cat.categories);
+            }
+        });
 
         let user = {
             identifiers: {
@@ -19,7 +29,7 @@ const transformObjectInsider = (records) => {
                 name: client.CLINombres,
                 surname: client.CLIApellidos,
                 birthday: client.CLIFechaNacimiento,
-                gender: client.CLISexo,
+                gender: client.CLISexo && !client.CLISexo.startsWith(" ") ? client.CLISexo : null,
                 language: "es-co",
                 country: "CO",
                 phone_number: getPhoneNumber(client)
@@ -32,7 +42,8 @@ const transformObjectInsider = (records) => {
                         product_id: client.RFICodigo,
                         unit_price: client.IRFBruto,
                         unit_sale_price: client.IRFVenta,
-                        event_group_id: client.ENCCodigo,
+                        event_group_id: String(client.ENCCodigo),
+                        taxonomy: taxonomy[0],
                         currency: "COP"   
                     }
                 }
