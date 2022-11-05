@@ -8,6 +8,9 @@
 const transformObjectInsider = (recordset, purchase) => {
     if (!recordset) return console.error("🔴 Error in record set");
 
+    // Helper to avoid construct data from not valid data
+    if (recordset.length == 0) return;
+
     let clientes = recordset.filter(user => user.CLIEmailPrincipal && user.CLIEmailPrincipal.length > 0);
 
     const categories = purchase && purchase.length > 0 ? purchase.map(p => { return { productId : p[0].productId, categories: p[0].categories } }) : null;
@@ -70,6 +73,9 @@ const transformObjectInsider = (recordset, purchase) => {
  * @returns 
  */
 const appendObjectInsider = (usersA, usersB) => {
+    if(!usersA || !usersA.users || usersA.users.length == 0) return null;
+    if(!usersB || !usersB.users || usersB.users.length == 0) return null;
+
     usersB.users.map(user => usersA.users.push(user));
     return usersA;
 }

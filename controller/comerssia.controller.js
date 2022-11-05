@@ -5,6 +5,7 @@ const axios = require('axios');
 const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
 const { transformObjectInsider, getPhoneNumber, appendObjectInsider } = require("../utils/insider.utils");
 
+
 exports.getOrders = (req, res, next) => {
 
     const query = req.query;
@@ -163,6 +164,8 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
             const onlineTransactions = recordset.filter(record => record.Origen == "ONLINE");
             const offlineTransactions = recordset.filter(record => record.Origen == "OFFLINE");
 
+            if (onlineTransactions.length == 0 && offlineTransactions.length == 0) return res.json({ success: false, message: "There is not data to send to insider" });
+
             // For Vtex transaction -> Ask Vtex about the rest of info
             const reqProductIDs = onlineTransactions.map(record => {
                 const url = `${process.env.SERVER_HOST}/api/catalog/${record.RFICodigo}`;
@@ -172,25 +175,49 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
             Promise.all(reqProductIDs)
                 .then(vtexProducts => {
 
-                    const reqProducts = vtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(data => data.data));
+                    const filterVtexProducts = vtexProducts.filter(product => product && product.LinkId);
+                    const reqProducts = filterVtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(data => data.data));
                 
                     Promise.all(reqProducts)
                         .then(products => products.filter(product => product.length > 0))
                         .then(purchase => purchase.map(products => products.map(product => { return { productId: product.productId, categories: product.categories } })))
                         .then(purchase => {
+                            
+                            let totalUsers = "";
                             const onlineUsers = transformObjectInsider(onlineTransactions, purchase);
                             const offlineUsers = transformObjectInsider(offlineTransactions);
-                            const totalUsers = appendObjectInsider(onlineUsers, offlineUsers);
+                            totalUsers = appendObjectInsider(onlineUsers, offlineUsers);
 
-                            return totalUsers;
+                            // Assuming that the append was not possible due one of arrays was undefined
+                            // We take either onlineUsers or offlineUsers
+                            if (typeof totalUsers == "undefined" || !totalUsers || totalUsers.users.length == 0) {
+                                if (onlineUsers && onlineUsers.users.length > 0) {
+                                    totalUsers = onlineUsers;
+                                } else if ( offlineUsers && offlineUsers.users.length > 0 ){
+                                    totalUsers = offlineUsers;
+                                } 
+                            }
+
+                            // If the array is still not valid we just do not send the data
+                            if (!totalUsers || totalUsers.users.length == 0 ) {
+                                return [];
+                            } else {
+                                return totalUsers;
+                            }
+
                         })
                         .then(records => {
-                            axios.post(insiderURL, records)
-                                .then(data => data.data)
-                                .then(result => res.json({ input: records, result }))
-                                .catch(err => next(createError(err)));
+                            if (records.length == 0) {
+                                res.json({ success: false, message: "No data has been sent to Insider." })
+                            } else {
+                                axios.post(insiderURL, records)
+                                    .then(data => data.data)
+                                    .then(result => res.json({ input: records, result }))
+                                    .catch(err => next(createError(err)));
+                            }
+                            
                         })
-                        .catch(err => next(createError(err, "Debug: reqProducts")));
+                        .catch(err => next(createError(err)));
                         
                 })
                 .catch(err => next(createError(err)));

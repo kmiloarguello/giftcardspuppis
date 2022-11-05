@@ -10,7 +10,14 @@ exports.getProductBySku = (req, res, next) => {
     getProductByRef(skuId)
         .then(response => response.data)
         .then(product => res.json(product))
-        .catch(err => next(createError(err)));
+        .catch(err => {
+            const { status, statusText } = err.response;
+            if (status == 404) {
+                return res.json({ success: false, message: statusText  })
+            } else {
+                return next(createError(err));
+            }            
+        });
 }
 
 exports.searchProductByURL = (req, res, next) => {
