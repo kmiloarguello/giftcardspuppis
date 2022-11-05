@@ -1,23 +1,29 @@
-const transformObjectInsider = (records, purchase) => {
-    if (!records) return console.error("🔴 Records is undefined");
 
-    const { recordset } = records;
+/**
+ * @desc    This function creates the object to send to Insider
+ * @param {Array} recordset -> Data from Comerssia
+ * @param {Array} purchase -> Data from Vtex [{ productId : '', categories : [..]}]
+ * @returns 
+ */
+const transformObjectInsider = (recordset, purchase) => {
     if (!recordset) return console.error("🔴 Error in record set");
 
     let clientes = recordset.filter(user => user.CLIEmailPrincipal && user.CLIEmailPrincipal.length > 0);
-    
-    const categories = purchase.map(p => { return { productId : p[0].productId, categories: p[0].categories } });
+
+    const categories = purchase && purchase.length > 0 ? purchase.map(p => { return { productId : p[0].productId, categories: p[0].categories } }) : null;
 
     const users = clientes.map(client => {
 
         let taxonomy = [];
 
-        categories.map(cat => {
-            if (cat.productId == client.RFICodigo) {
-                taxonomy.push(cat.categories);
-            }
-        });
-
+        if (categories) {
+            categories.map(cat => {
+                if (cat.productId == client.RFICodigo) {
+                    taxonomy.push(cat.categories);
+                }
+            });
+        }
+        
         let user = {
             identifiers: {
                 email: client.CLIEmailPrincipal,
@@ -43,7 +49,7 @@ const transformObjectInsider = (records, purchase) => {
                         unit_price: client.IRFBruto,
                         unit_sale_price: client.IRFVenta,
                         event_group_id: String(client.ENCCodigo),
-                        taxonomy: taxonomy[0],
+                        taxonomy: categories ? taxonomy[0] : taxonomy,
                         currency: "COP"   
                     }
                 }
@@ -57,6 +63,23 @@ const transformObjectInsider = (records, purchase) => {
 }
 
 
+/**
+ * @desc    This function append one user into the set of users
+ * @param {Object} usersA 
+ * @param {Object} usersB 
+ * @returns 
+ */
+const appendObjectInsider = (usersA, usersB) => {
+    usersB.users.map(user => usersA.users.push(user));
+    return usersA;
+}
+
+
+/**
+ * @desc    This function obtains the customer number
+ * @param {Object} client 
+ * @returns 
+ */
 const getPhoneNumber = (client) => {
     let phone_number = "";
 
@@ -85,5 +108,6 @@ const getPhoneNumber = (client) => {
 
 module.exports = {
     transformObjectInsider,
-    getPhoneNumber
+    getPhoneNumber,
+    appendObjectInsider
 }

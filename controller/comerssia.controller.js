@@ -3,7 +3,7 @@ const sql = require('mssql');
 const createError = require('http-errors');
 const axios = require('axios');
 const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
-const { transformObjectInsider, getPhoneNumber } = require("../utils/insider.utils");
+const { transformObjectInsider, getPhoneNumber, appendObjectInsider } = require("../utils/insider.utils");
 
 exports.getOrders = (req, res, next) => {
 
@@ -90,7 +90,16 @@ exports.getProfile = (req, res, next) => {
     const { email } = query;
 
     const URL = "https://unification.useinsider.com/api/user/v1/profile";
-    const body = { identifiers: { email } };
+    const body = { 
+        identifiers : { email },
+        attributes  : [
+            "email",
+            "name",
+            "surname",
+            "phone_number"
+        ],
+        quota: true 
+    };
     const headers = {
         headers: {
             "X-PARTNER-NAME" : process.env.INSIDER_PARTNER,
@@ -98,8 +107,10 @@ exports.getProfile = (req, res, next) => {
             "Content-Type" : "application/json"
         }
     };
+
     axios.post(URL, JSON.stringify(body), headers)
-        .then(res => res.json(res))
+        .then(response => response.data)
+        .then(user => res.json(user))
         .catch(err => next(createError(err)));
 
 }
@@ -134,7 +145,6 @@ exports.upsert = (req, res, next) => {
         .catch(err => next(createError(err)));
 }
 
-
 exports.updateInsiderFromComerssia = (req, res, next) => {
     const { day_start, day_end, hour_start, hour_end, limit } = req.query;
     
@@ -146,25 +156,41 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
     axios.get(comerssiaURL)
         .then(data => data.data)
         .then(records => {
+            
             const { recordset } = records;
-            const reqProductIDs = recordset.map(record => axios.get(`${process.env.SERVER_HOST}/api/catalog/${record.RFICodigo}`).then(data => data.data));
+           
+            // filter in online and offline
+            const onlineTransactions = recordset.filter(record => record.Origen == "ONLINE");
+            const offlineTransactions = recordset.filter(record => record.Origen == "OFFLINE");
+
+            // For Vtex transaction -> Ask Vtex about the rest of info
+            const reqProductIDs = onlineTransactions.map(record => {
+                const url = `${process.env.SERVER_HOST}/api/catalog/${record.RFICodigo}`;
+                return axios.get(url).then(response => response.data);
+            });
             
             Promise.all(reqProductIDs)
                 .then(vtexProducts => {
 
                     const reqProducts = vtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(data => data.data));
-
+                
                     Promise.all(reqProducts)
                         .then(products => products.filter(product => product.length > 0))
                         .then(purchase => purchase.map(products => products.map(product => { return { productId: product.productId, categories: product.categories } })))
-                        .then(purchase => transformObjectInsider(records, purchase))
+                        .then(purchase => {
+                            const onlineUsers = transformObjectInsider(onlineTransactions, purchase);
+                            const offlineUsers = transformObjectInsider(offlineTransactions);
+                            const totalUsers = appendObjectInsider(onlineUsers, offlineUsers);
+
+                            return totalUsers;
+                        })
                         .then(records => {
                             axios.post(insiderURL, records)
                                 .then(data => data.data)
                                 .then(result => res.json({ input: records, result }))
                                 .catch(err => next(createError(err)));
                         })
-                        .catch(err => next(createError(err)));
+                        .catch(err => next(createError(err, "Debug: reqProducts")));
                         
                 })
                 .catch(err => next(createError(err)));
