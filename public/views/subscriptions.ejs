@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscriptions!</title>
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="../css/subscriptions.styles.css">
+</head>
+<body>
+    <main id="main-page">
+        <div class="navbar-fixed">
+            <nav>
+              <div class="nav-wrapper blue-grey lighten-4">
+                <a href="/subscriptions" class="brand-logo">
+                    <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" width="50" height="50"/>
+                </a>
+              </div>
+            </nav>
+          </div>
+        <div class="container">
+            <div class="row search-panel">
+                <div class="col s6">
+                    <ul class="collection menu-subscriptions">
+                        <li class="col s3 collection-item active"><button class="btn-small nofilter">Ver todos</button></li>
+                        <li class="col s3 collection-item "><button class="btn-small filter-by-active">Activas</button></li>
+                        <li class="col s3 collection-item filter-by-paused"><button class="btn-small">Pausadas</button></li>
+                        <li class="col s3 collection-item filter-by-canceled"><button class="btn-small">Cancelads</button></li>
+                    </ul>
+                </div>
+                <form class="col s6">
+                    <div class="input-field inline">
+                        <input id="email_inline" type="email" class="validate">
+                        <label for="email_inline">Email</label>
+                        <span class="helper-text" data-error="wrong" data-success="right">Helper text</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="had-container">
+            <div class="row content-panel">
+                <div class="card-panel">
+                    <ul class="collection subscription-title">
+                        <li class="col s3 email-title">Email</li>
+                        <li class="col s2 last-purchase-title">Ult. compra</li>
+                        <li class="col s2 next-purchase-title">Prox. compra</li>
+                        <li class="col s2 items-title">Items</li>
+                        <li class="col s1 status-title">Status</li>
+                        <li class="col s2 "></li>
+                    </ul>
+                    <ul class="collection subscriptions-list"></ul>
+                    <ul class="pagination"></ul>
+                </div>
+            </div>
+          </div>
+        <div class="container-image">
+            
+        </div>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+     <!-- Compiled and minified JavaScript -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="../js/subscription.script.js" type="text/javascript"></script>
+</body>
+</html>

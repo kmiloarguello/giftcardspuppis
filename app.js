@@ -13,6 +13,7 @@ const ordersRouter = require('./routes/orders.routes');
 const catalogRouter = require('./routes/catalog.routes');
 const logisticsRouter = require('./routes/logistics.routes');
 const comerssiaRouter = require('./routes/comerssia.routes');
+const subscriptionRouter = require('./routes/subscription.routes');
 
 const app = express();
 app.use(cors());
@@ -38,6 +39,11 @@ app.use('/api/orders',ordersRouter);
 app.use('/api/catalog', catalogRouter);
 app.use('/api/logistics', logisticsRouter);
 app.use('/api/comerssia', comerssiaRouter);
+
+// For suscriptions
+app.get("/subscriptions", (req, res) => res.render("subscriptions"));
+app.use('/api/subscriptions', subscriptionRouter);
+
 
 // Tasks
 require('./jobs/insider.job');

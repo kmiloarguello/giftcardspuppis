@@ -7,7 +7,7 @@ axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
 axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
 
 const dailyCron = "0 1 * * *"; // everyday at 00:00
-const minuteCron = "* * * * *"; // To test
+const minuteCron = "* * * * * *"; // To test
 
 cron.schedule(dailyCron, () => {
     // Data to write on file
@@ -16,6 +16,6 @@ cron.schedule(dailyCron, () => {
     // Appending data to logs.txt file
     fs.appendFile("./logs/logs.txt", data, function(err) {
         if (err) throw err;
-        //console.log("Status Logged!");
+        console.log("Status Logged!");
     });
 });
