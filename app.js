@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 //import routes
@@ -17,6 +18,7 @@ const subscriptionRouter = require('./routes/subscription.routes');
 
 const app = express();
 app.use(cors());
+app.use(cookieParser());
 
 //Your Express app needs to use CORS (Cross-Origin Resource Sharing)
 app.use(cors());
@@ -41,9 +43,21 @@ app.use('/api/logistics', logisticsRouter);
 app.use('/api/comerssia', comerssiaRouter);
 
 // For suscriptions
-app.get("/suscripciones", (req, res) => res.render("subscriptions"));
+app.get("/suscripciones", (_, res) => {
+  res.clearCookie("subscriptionkey");
+  res.render("index-subscriptions")
+});
+app.get("/suscripciones/redirect", (_, res) => {
+  const token = jwt.sign({ host: "puppiscol" }, process.env.KEY_UPLOAD, { algorithm: "HS256", expiresIn: 36000 });
+  res.cookie("subscriptionkey", token);
+  res.redirect("/suscripciones/dashboard");
+})
+app.get("/suscripciones/dashboard", (req, res) => {
+  const { subscriptionkey } = req.cookies;
+  if (!subscriptionkey) return res.redirect("/suscripciones");
+  res.render("subscriptions")
+});
 app.use('/api/subscriptions', subscriptionRouter);
-
 
 // Tasks
 require('./jobs/insider.job');
@@ -55,7 +69,7 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 

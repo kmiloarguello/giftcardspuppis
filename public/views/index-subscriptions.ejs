@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscriptions!</title>
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="../css/subscriptions.styles.css">
+</head>
+<body class="login">
+    <main id="main-page">
+        <div class="nav navbar-fixed">
+            <nav>
+              <div class="nav-wrapper">
+                <a href="/subscriptions" class="brand-logo">
+                    <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" width="64" height="64"/>
+                </a>
+              </div>
+            </nav>
+        </div>
+        <div class="header-search had-container">
+            <div class="row">
+                <h1 class="header">Suscripciones en Puppis Colombia</h1>
+                <hr />
+                <p>Actualiza el estado de las suscripciones, busca por email o filtra. Los resultados serán actualizados en Vtex en un instante.</p>
+            </div>
+            <div class="row search-panel">
+                <form class="col s6 login-panel">
+                    <div class="search-panel card-panel">
+                        <div class="input-field inline">
+                            <input id="email_inline" type="email" class="validate">
+                            <label for="email_inline">
+                                <i class="material-icons">mail</i>
+                                <span>Ingresa tu email</span>
+                            </label>
+                        </div>
+                        <div class="input-field inline">
+                            <input id="password" type="password" class="validate">
+                            <label for="password">
+                                <i class="material-icons">key</i>
+                                <span>Ingresa el codigo asignado</span>
+                            </label>
+                        </div>
+                        <div class="btn-search">
+                            <button class="waves-effect waves-light btn login-with-email yellow darken-2">
+                                Enviar
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="../js/subscription.script.js" type="text/javascript"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 const axios = require("axios");
 const createError = require('http-errors');
+const jwt = require('jsonwebtoken');
 
 exports.findAll = (req, res, next) => {
 
@@ -40,4 +41,17 @@ exports.update = (req, res, next) => {
         .then(response => response.data)
         .then(subscription => res.json(subscription))
         .catch(err => next(createError(err)));
+}
+exports.login = (req, res, next) => {
+
+    const body = req.body;
+    const { email, code } = body;
+    
+    if (!email || !code) return next(createError(400, "Missing information"));
+
+    if (code == process.env.SUBSCRIPTIONS_CODE) {
+        return res.json({ success: true });
+    } else {
+        return res.status(403).json({ success: false });
+    }
 }

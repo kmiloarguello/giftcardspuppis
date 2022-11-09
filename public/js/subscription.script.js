@@ -32,11 +32,35 @@ const Subscriptions = {
             .on("click", ".cancel-subscription", function () { Subscriptions.launchConfirmationModal($(this).attr("id"),"subscription-cancel-confirmation","CANCELED") })
             .on("click", ".activate-subscription", function () { Subscriptions.launchConfirmationModal($(this).attr("id"),"subscription-activate-confirmation","ACTIVE") })
             .on("click", ".confirm-cancel-suscription,.confirm-activate-suscription", () => this.confirmUpdateSubscription())
+            .on("click", ".login-with-email", function (event) {
+                event.preventDefault();
+
+                const email = $("input#email_inline").val();
+                const password = $("input#password").val();
+                
+                if (!email || !password) return M.toast({html: 'Completa los datos!'});
+                if (!Subscriptions.isAValidEmail(email)) return M.toast({ html: 'Email no válido!' });
+                Subscriptions.loginWithEmailAndCode(email, password);
+            })
             
     },
 
     setEmail (email) {
         this.email = email;
+    },
+
+    loginWithEmailAndCode (email, code) {
+        if (!email || !code) return console.error("Missed data");
+
+        this._postLogin(email, code)
+            .then(res => {
+                if (res.status >= 400) {
+                    M.toast({html: 'Datos no válidos!'});
+                } else {
+                    location.href = "/suscripciones/redirect";
+                }
+            })
+            .catch(err => console.error(err));
     },
 
     initModal () {
@@ -89,6 +113,17 @@ const Subscriptions = {
             })
             .catch(err => console.error(err))
 
+    },
+
+    _postLogin(email, code) {
+        const options = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({ email, code })
+        }
+        return fetch(`http://127.0.0.1:5000/api/subscriptions/login`, options);
     },
 
     _getSubscriptions (page=1, size=this.size) {

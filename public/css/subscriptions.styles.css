@@ -151,7 +151,6 @@ hr {
     color: #444;
 }
 
-
 #product-detail-modal p.description-modal {
     font-size: .9rem;
     font-weight: 300;
@@ -177,4 +176,12 @@ hr {
 #subscription-activate-confirmation span,
 #subscription-cancel-confirmation span {
     font-weight: 500;
+}
+
+.login-panel {
+    margin: auto;
+}
+
+.login-panel .search-panel {
+    flex-direction: column;
 }
