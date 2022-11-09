@@ -281,14 +281,17 @@ const Subscriptions = {
     },
 
     renderPagination (from=1, to=5) {
-
+        
         let _paginationLayout = "";
         _paginationLayout += `<li><button class="waves-effect waves-light btn-small prev-page yellow darken-2 ${from <= 1 ? "disabled" : ""}"><i class="material-icons">chevron_left</i></button></li>`;
         
         for (let i=from;i<(to);i++) {
             _paginationLayout += `<li><button class="waves-effect waves-light btn-small btn-small btn-page yellow darken-2" data-page="${i}">${i}</button></li>`;
         }
-        _paginationLayout += `<li><button class="waves-effect waves-light btn-small btn-small next-page yellow darken-2"><i class="material-icons">chevron_right</i></button></li>`;
+        
+        if (this.subscriptions.length > 0) {
+            _paginationLayout += `<li><button class="waves-effect waves-light btn-small btn-small next-page yellow darken-2"><i class="material-icons">chevron_right</i></button></li>`;
+        }
 
         $(".pagination").html(_paginationLayout);
     },

@@ -41,7 +41,7 @@ app.use('/api/logistics', logisticsRouter);
 app.use('/api/comerssia', comerssiaRouter);
 
 // For suscriptions
-app.get("/subscriptions", (req, res) => res.render("subscriptions"));
+app.get("/suscripciones", (req, res) => res.render("subscriptions"));
 app.use('/api/subscriptions', subscriptionRouter);
 
 
