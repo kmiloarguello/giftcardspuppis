@@ -66,6 +66,6 @@ const DB = {
     },
 };
 
-DB.init();
+//DB.init();
 
 module.exports = DB;

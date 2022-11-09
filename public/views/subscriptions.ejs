@@ -12,35 +12,51 @@
 </head>
 <body>
     <main id="main-page">
-        <div class="navbar-fixed">
+        <div class="nav navbar-fixed">
             <nav>
-              <div class="nav-wrapper blue-grey lighten-4">
+              <div class="nav-wrapper">
                 <a href="/subscriptions" class="brand-logo">
-                    <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" width="50" height="50"/>
+                    <img src="../img/logo-puppis-icon-blue.jpg" alt="Puppis Colombia" width="64" height="64"/>
                 </a>
               </div>
             </nav>
-          </div>
-        <div class="container">
+        </div>
+        <div class="header-search had-container">
+            <div class="row">
+                <h1 class="header">Suscripciones en Puppis Colombia</h1>
+                <hr />
+                <p>Actualiza el estado de las suscripciones, busca por email o filtra. Los resultados serán actualizados en Vtex en un instante.</p>
+            </div>
             <div class="row search-panel">
-                <div class="col s6">
-                    <ul class="collection menu-subscriptions">
-                        <li class="col s3 collection-item active"><button class="btn-small nofilter">Ver todos</button></li>
-                        <li class="col s3 collection-item "><button class="btn-small filter-by-active">Activas</button></li>
-                        <li class="col s3 collection-item filter-by-paused"><button class="btn-small">Pausadas</button></li>
-                        <li class="col s3 collection-item filter-by-canceled"><button class="btn-small">Cancelads</button></li>
-                    </ul>
+                <div class="col s8">
+                    <div class="card-panel">
+                        <ul class="collection menu-subscriptions">
+                            <li class="active"><button class="waves-effect waves-light btn nofilter yellow darken-2">Ver todos</button></li>
+                            <li><button class="waves-effect waves-light btn-flat filter-by-active">Activas</button></li>
+                            <li><button class="waves-effect waves-light btn-flat filter-by-paused">Pausadas</button></li>
+                            <li><button class="waves-effect waves-light btn-flat filter-by-canceled">Canceladas</button></li>
+                        </ul>
+                    </div>
+                    
                 </div>
-                <form class="col s6">
-                    <div class="input-field inline">
-                        <input id="email_inline" type="email" class="validate">
-                        <label for="email_inline">Email</label>
-                        <span class="helper-text" data-error="wrong" data-success="right">Helper text</span>
+                
+                <form class="col s4">
+                    <div class="search-panel card-panel">
+                        <div class="input-field inline">
+                            <input id="email_inline" type="email" class="validate">
+                            <label for="email_inline">
+                                <i class="material-icons">search</i>
+                                <span>Busca por email</span>
+                            </label>
+                        </div>
+                        <div class="btn-search">
+                            <button class="waves-effect waves-light btn search-by-email yellow darken-2"><i class="material-icons">search</i></button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="had-container">
+        <div class="subscriptions-content had-container">
             <div class="row content-panel">
                 <div class="card-panel">
                     <ul class="collection subscription-title">
@@ -51,13 +67,68 @@
                         <li class="col s1 status-title">Status</li>
                         <li class="col s2 "></li>
                     </ul>
-                    <ul class="collection subscriptions-list"></ul>
+                    <ul class="collection subscriptions-list">
+                        <div class="progress yellow lighten-5">
+                            <div class="indeterminate yellow darken-2"></div>
+                        </div>
+                    </ul>
                     <ul class="pagination"></ul>
                 </div>
             </div>
-          </div>
-        <div class="container-image">
-            
+        </div>
+
+        <div id="product-detail-modal" class="modal">
+            <div class="progress">
+                <div class="indeterminate"></div>
+            </div>
+
+            <a class="btn-floating btn-small modal-close waves-effect waves-light red"><i class="material-icons">close</i></a>
+    
+            <div class="modal-content">
+              <h4 class="title-modal"></h4>
+              <p class="description-modal"></p>
+              <hr>
+              <table class="details-modal centered">
+                <thead>
+                    <tr>
+                        <th>Sku ID</th>
+                        <th>Marca ID</th>
+                        <th>Categoria ID</th>
+                        <th>Departamento ID</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <a href="" class="go-to-product waves-effect waves-light btn-flat " target="_blank">Visitar producto</a>
+            </div>
+        </div>
+
+        <div id="subscription-cancel-confirmation" class="modal">
+            <div class="progress">
+                <div class="indeterminate"></div>
+            </div>
+            <div class="modal-content">
+                <p>Estas a punto de cancelar la suscripción para el usuario <span class="email-usuario"></span>. Deseas confirmar la <strong>cancelación</strong> de la suscripción?</p>
+              </div>
+              <div class="modal-footer">
+                <button class="modal-close waves-effect waves-light btn-flat">Volver</button>
+                <button class="waves-effect waves-light btn confirm-cancel-suscription red" data-email="">Confirmar</button>
+              </div>
+        </div>
+        <div id="subscription-activate-confirmation" class="modal">
+            <div class="progress">
+                <div class="indeterminate"></div>
+            </div>
+            <div class="modal-content">
+                <p>Estas a punto de activar la suscripción para el usuario <span class="email-usuario"></span>. Deseas confirmar la <strong>activación</strong> de la suscripción?</p>
+              </div>
+              <div class="modal-footer">
+                <button class="modal-close waves-effect waves-light btn-flat">Volver</button>
+                <button class="waves-effect waves-light btn confirm-activate-suscription green" data-email="">Confirmar</button>
+              </div>
         </div>
     </main>
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>

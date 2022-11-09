@@ -17,5 +17,27 @@ exports.findAll = (req, res, next) => {
         .catch(err => next(createError(err)));
 
 }
-exports.findOne = (req, res, next) => {}
-exports.update = (req, res, next) => {}
+exports.findOne = (req, res, next) => {
+    const { id } = req.params;
+    if (!id) next(createError(400, "There is not ID"));
+
+    const URL = `/api/rns/pub/subscriptions/${id}`;
+
+    axios.get(URL)
+        .then(response => response.data)
+        .then(subscription => res.json(subscription))
+        .catch(err => next(createError(err)));
+
+}
+exports.update = (req, res, next) => {
+    const { id } = req.params;
+    if (!id) next(createError(400, "There is not ID"));
+
+    const body = req.body;
+    const URL = `/api/rns/pub/subscriptions/${id}`;
+    
+    axios.patch(URL, body)
+        .then(response => response.data)
+        .then(subscription => res.json(subscription))
+        .catch(err => next(createError(err)));
+}
