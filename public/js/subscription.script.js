@@ -155,14 +155,7 @@ const Subscriptions = {
 
     _getProductInfoBySku (skuId) {
         if (!skuId) return;
-        return fetch(`http://127.0.0.1:5000/api/catalog/${skuId}`).then(res => {
-            console.log(res)
-            if (res.status == 404) {
-                throw "Not found: " + skuId
-            } else {
-                return res.json()
-            }
-        });
+        return fetch(`http://127.0.0.1:5000/api/catalog/${skuId}`).then(res => res.json());
     },
 
     getSubscriptions (page=1, size=this.size) {
@@ -230,15 +223,19 @@ const Subscriptions = {
 
     launchProductModal(skuId) {
         this._getProductInfoBySku(skuId)
+            .then(data => !Object.keys(data).some(d => d == "success") ? data : null)
             .then(product => this.renderProductModal(product))
-            .catch(err => {
-                console.error(err);
-                M.toast({html: 'Sku no encontrado!'});
-                $(".modal").modal("close");
-            });
+            .catch(err => console.error(err));
     },
 
     renderProductModal(product) {
+
+        if (!product) {
+            $(".modal").modal("close");
+            M.toast({html: 'Sku no encontrado!'});
+            return;
+        }
+
         $("#product-detail-modal .progress").remove();
 
         $("#product-detail-modal .modal-content h4.title-modal").text(product.Name);

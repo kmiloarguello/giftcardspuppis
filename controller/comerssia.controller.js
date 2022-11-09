@@ -169,17 +169,17 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
             // For Vtex transaction -> Ask Vtex about the rest of info
             const reqProductIDs = onlineTransactions.map(record => {
                 const url = `${process.env.SERVER_HOST}/api/catalog/${record.RFICodigo}`;
-                return axios.get(url).then(response => response.data);
+                return axios.get(url).then(response => response.data );
             });
             
             Promise.all(reqProductIDs)
                 .then(vtexProducts => {
 
                     const filterVtexProducts = vtexProducts.filter(product => product && product.LinkId);
-                    const reqProducts = filterVtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(data => data.data));
+                    const reqProducts = filterVtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(response => response.status < 400 ? response.data : null));
                 
                     Promise.all(reqProducts)
-                        .then(products => products.filter(product => product.length > 0))
+                        .then(products => products.filter(product => product && product.length > 0))
                         .then(purchase => purchase.map(products => products.map(product => { return { productId: product.productId, categories: product.categories } })))
                         .then(purchase => {
                             

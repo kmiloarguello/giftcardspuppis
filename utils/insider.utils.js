@@ -41,7 +41,10 @@ const transformObjectInsider = (recordset, purchase) => {
                 gender: client.CLISexo && !client.CLISexo.startsWith(" ") ? client.CLISexo : null,
                 language: "es-co",
                 country: "CO",
-                phone_number: getPhoneNumber(client)
+                phone_number: getPhoneNumber(client),
+                custom: {
+                    origen : client.Origen
+                }
             },
             events:[
                 {
