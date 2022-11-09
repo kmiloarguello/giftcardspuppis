@@ -57,8 +57,12 @@ const Subscriptions = {
                 if (res.status >= 400) {
                     M.toast({html: 'Datos no válidos!'});
                 } else {
-                    location.href = "/suscripciones/redirect";
+                    return res.json();
                 }
+            })
+            .then(data => {
+                document.cookie = `subscriptiontempkey=${data.token}`;
+                location.href = "/suscripciones/redirect";
             })
             .catch(err => console.error(err));
     },

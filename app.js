@@ -47,7 +47,12 @@ app.get("/suscripciones", (_, res) => {
   res.clearCookie("subscriptionkey");
   res.render("index-subscriptions")
 });
-app.get("/suscripciones/redirect", (_, res) => {
+app.get("/suscripciones/redirect", (req, res) => {
+  const { subscriptiontempkey } = req.cookies;
+
+  if (!subscriptiontempkey) return res.redirect("/suscripciones");
+  res.clearCookie("subscriptiontempkey");
+
   const token = jwt.sign({ host: "puppiscol" }, process.env.KEY_UPLOAD, { algorithm: "HS256", expiresIn: 36000 });
   res.cookie("subscriptionkey", token);
   res.redirect("/suscripciones/dashboard");

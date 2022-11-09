@@ -50,7 +50,9 @@ exports.login = (req, res, next) => {
     if (!email || !code) return next(createError(400, "Missing information"));
 
     if (code == process.env.SUBSCRIPTIONS_CODE) {
-        return res.json({ success: true });
+        const token = jwt.sign({ email }, process.env.KEY_UPLOAD, { algorithm: "HS256", expiresIn: 3600 });
+        res.cookie("subscriptiontempkey", encodeURI(token));
+        return res.json({ success: true, token: encodeURI(token) });
     } else {
         return res.status(403).json({ success: false });
     }
