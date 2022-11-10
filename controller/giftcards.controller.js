@@ -36,66 +36,91 @@ exports.update = (req, res) => {
           // It is a valid griftcard product
           if (typeof giftcardValue !== "undefined" && giftcardValue && giftcardValue > 0) {
             console.log("✅ Order: " + orderInfo.data.orderId + " has a giftcard.");
-            let recipientData = getRecipientUserData(orderInfo.data);
+
+            // Check if the order was with Contra Entrega -> If so, then NOT create the giftcard
+
+            const { paymentData } = orderInfo.data;
+            const { transactions } = paymentData;
+
+            const itWasContraEntrega = transactions.some(transaction => {
+              const _itWasContraEntrega = transaction.payments.some(payment => /contra/ig.test(payment.paymentSystemName.toLowerCase()) && /entrega/ig.test(payment.paymentSystemName.toLowerCase()));
+              if (_itWasContraEntrega) return true;
+              return false;
+            });
+
+            // Only continue when IT ISN'T -> Contra Entrega
+            if (!itWasContraEntrega) {
+              let recipientData = getRecipientUserData(orderInfo.data);
   
-            getProfileData(orderInfo.data)
-              .then(userData => {
-  
-                console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");           
-                creatingGiftNewGiftCard(recipientData, giftcardValue, setExpirationGiftDate())
-                  .then(newGiftCard => {
-  
-                    console.log("✅ Order: " + orderInfo.data.orderId + " has created the giftcard 💳.");
-                    assignValueNewGiftCard(newGiftCard.data, giftcardValue)
-                      .then(giftCardFinalData => {
-  
-                        console.log("✅ Order: " + orderInfo.data.orderId + " has assigned correctly the giftcard balance.");
-                        createMDGiftCards(orderId, userData.data, recipientData, giftCardFinalData.data, orderStatus)
-                          .then(sendInfoToMD => {
-  
-                            console.log("✅ Order: " + orderInfo.data.orderId + " has been sent it back the info to Vtex. EXIT.");
-                            return res.json({
-                              success: true,
-                              message: "Giftfcard successfully created",
-                              giftcard: giftCardFinalData.data,
-                              masterData: sendInfoToMD.data
+              getProfileData(orderInfo.data)
+                .then(userData => {
+    
+                  console.log("✅ Order: " + orderInfo.data.orderId + " has correct user data.");           
+                  creatingGiftNewGiftCard(recipientData, giftcardValue, setExpirationGiftDate())
+                    .then(newGiftCard => {
+    
+                      console.log("✅ Order: " + orderInfo.data.orderId + " has created the giftcard 💳.");
+                      assignValueNewGiftCard(newGiftCard.data, giftcardValue)
+                        .then(giftCardFinalData => {
+    
+                          console.log("✅ Order: " + orderInfo.data.orderId + " has assigned correctly the giftcard balance.");
+                          createMDGiftCards(orderId, userData.data, recipientData, giftCardFinalData.data, orderStatus)
+                            .then(sendInfoToMD => {
+    
+                              console.log("✅ Order: " + orderInfo.data.orderId + " has been sent it back the info to Vtex. EXIT.");
+                              return res.json({
+                                success: true,
+                                message: "Giftfcard successfully created",
+                                giftcard: giftCardFinalData.data,
+                                masterData: sendInfoToMD.data
+                              });
+                            })
+                            .catch(error => {
+                              console.log("❗ Order: " + orderId + ". Error saving the new Giftcard in Master Data.", error);
+                              createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error saving the new Giftcard in Master Data.",newGiftCard.data.id );
+                              return res.json({
+                                success: false,
+                                message: "Order: " + orderId + ". Error saving the new Giftcard in Master Data."
+                              });
                             });
-                          })
-                          .catch(error => {
-                            console.log("❗ Order: " + orderId + ". Error saving the new Giftcard in Master Data.", error);
-                            createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error saving the new Giftcard in Master Data.",newGiftCard.data.id );
-                            return res.json({
-                              success: false,
-                              message: "Order: " + orderId + ". Error saving the new Giftcard in Master Data."
-                            });
+                        })
+                        .catch(error => {
+                          console.log("❗ Order: " + orderId + ". Error assigning value to the giftcard.", error);
+                          createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error assigning value to the giftcard.",newGiftCard.data.id );
+                          return res.json({
+                            success: false,
+                            message: "Order: " + orderId + ". Error assigning value to the giftcard."
                           });
-                      })
-                      .catch(error => {
-                        console.log("❗ Order: " + orderId + ". Error assigning value to the giftcard.", error);
-                        createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error assigning value to the giftcard.",newGiftCard.data.id );
-                        return res.json({
-                          success: false,
-                          message: "Order: " + orderId + ". Error assigning value to the giftcard."
                         });
+                    })
+                    .catch(error => {
+                      console.log("❗ Order: " + orderId + ". Error trying to create a giftcard. ", error.message + ", data: " + error.config.data );
+                      createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard. " + error.message + ", data: " + error.config.data );
+                      return res.json({
+                        success: false,
+                        message: "Order: " + orderId + ". Error trying to create a giftcard."
                       });
-                  })
-                  .catch(error => {
-                    console.log("❗ Order: " + orderId + ". Error trying to create a giftcard. ", error.message + ", data: " + error.config.data );
-                    createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard. " + error.message + ", data: " + error.config.data );
-                    return res.json({
-                      success: false,
-                      message: "Order: " + orderId + ". Error trying to create a giftcard."
                     });
+                })
+                .catch(error => {
+                  console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
+                  createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error on User profile Data.");
+                  return res.json({
+                    success: false,
+                    message: "Order: " + orderId + ". Error on User profile Data."
                   });
-              })
-              .catch(error => {
-                console.log("❗ Order: " + orderId + ". Error on User profile Data", error);
-                createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error on User profile Data.");
-                return res.json({
-                  success: false,
-                  message: "Order: " + orderId + ". Error on User profile Data."
                 });
+
+            } else {
+              console.log("❗ Order: " + orderId + ". Error trying to create a giftcard.");
+              createLogGiftCardinMD(orderId, "Order: " + orderId + ". Error trying to create a giftcard. The payment was Pago contra entrega.");
+              return res.json({
+                success: false,
+                message: "Order: " + orderId + ". Error trying to create a giftcard."
               });
+            }
+            
+            
           } else {
   
             // Flow for Update MD with Subscription Information
