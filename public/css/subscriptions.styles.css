@@ -1,0 +1,187 @@
+.navbar-fixed nav .nav-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fed020;
+}
+
+.navbar-fixed nav .nav-wrapper a {
+    position: relative;
+    height: 64px;
+}
+
+.subscriptions-content,
+.header-search {
+    margin: 10px auto;
+    width: 95%;
+}
+
+.header-search {
+    margin-top: 20px;
+}
+
+.header-search h1 {
+    font-weight: 300;
+    font-size: 1.5rem;
+    margin: auto;
+    color: #444;
+}
+hr {
+    height: 1px;
+    padding: 0;
+    color: #ececec;
+    background-color: #ececec;
+    border: 0;
+}
+.header-search p {
+    font-weight: 300;
+}
+
+.header-search ul.menu-subscriptions {
+    border: none;
+    display: flex;
+    justify-content: center;
+}
+
+.header-search ul.menu-subscriptions li {
+    border: 1px solid #ececec;
+    overflow: hidden;
+}
+
+.header-search ul.menu-subscriptions li:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.header-search ul.menu-subscriptions li:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.header-search .search-panel {
+    display: flex;
+    align-items: center;
+}
+
+.header-search .input-field {
+    margin: 7px auto;
+    display: block;
+    width: 80%;
+}
+.header-search form input {
+    margin: 0 !important;
+}
+.header-search form label {
+    display: flex;
+    column-gap: 10px;
+}
+
+.subscriptions-content .subscription-title {
+    margin: 0;
+    padding: 10px 0;
+    background-color: #fafafa;
+    border-color: #fafafa;
+}
+
+.subscriptions-content .subscription-title li {
+    color: #949494;
+    font-weight: 300;
+}
+
+.subscriptions-content .subscriptions-list {
+    font-size: .9em;
+}
+.subscriptions-content .subscriptions-list li {
+    display: flex;
+    align-items: center;
+    color: #444;
+    font-weight: 300;
+}
+
+.subscriptions-content .subscriptions-list li ul.items,
+.subscriptions-content .subscriptions-list li .status {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.subscriptions-content .subscriptions-list li ul.items li {
+    border: 1px solid #ececec;
+    border-radius: 5px;
+    font-size: .8em;
+    padding: 0 5px;
+    cursor: pointer;
+}
+.subscriptions-content .subscriptions-list li .status span {
+    border-radius: 5px;
+    padding: 0 5px;
+    border: none;
+    font-size: .85em;
+}
+.subscriptions-content .subscriptions-list li .status span.ACTIVE {
+    background-color: #00c853;
+    color: white;
+}
+.subscriptions-content .subscriptions-list li .status span.CANCELED {
+    background-color: #ff6e40;
+    color: white;
+}
+.subscriptions-content .subscriptions-list li .status span.PAUSED {
+    background-color: #ffa000;
+    color: white;
+}
+
+.subscriptions-content .pagination {
+    display: flex;
+    justify-content: center;
+    column-gap: 5px;
+}
+
+#product-detail-modal .modal-close {
+    position: absolute;
+    right: -0;
+    top: -0;
+    border-radius: 0;
+}
+
+#product-detail-modal h4.title-modal {
+    font-size: 1.3em;
+    font-weight: 500;
+    color: #444;
+}
+
+#product-detail-modal p.description-modal {
+    font-size: .9rem;
+    font-weight: 300;
+
+}
+
+#product-detail-modal table thead th {
+    font-size: .9em;
+    font-weight: 500;
+}
+
+#product-detail-modal table tbody td {
+    font-size: .85em;
+    font-weight: 300;
+}
+
+#subscription-activate-confirmation p,
+#subscription-cancel-confirmation p {
+    font-weight: 300;
+    color: #444;
+}
+
+#subscription-activate-confirmation span,
+#subscription-cancel-confirmation span {
+    font-weight: 500;
+}
+
+.login-panel {
+    margin: auto;
+}
+
+.login-panel .search-panel {
+    flex-direction: column;
+}
