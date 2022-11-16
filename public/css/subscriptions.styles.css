@@ -185,3 +185,7 @@ hr {
 .login-panel .search-panel {
     flex-direction: column;
 }
+
+.login-panel .btn-login {
+    margin: 20px auto 10px;
+}
