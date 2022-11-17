@@ -4,7 +4,7 @@ const Subscriptions = {
     elementId: null, // current modal id
     page: 1, // Initial page
     size: 50, // Number of rows to show
-    limitSearch: 20, // Limit page when searching with an email
+    limitSearch: 30, // Limit page when searching with an email
     email : null, // current email to seach
 
     init () {
@@ -388,7 +388,7 @@ const Subscriptions = {
                         ${new Date(subscription.lastPurchaseDate).toLocaleDateString()}
                     </div>
                     <div class="col s2 next-purchase">
-                        ${new Date(subscription.nextPurchaseDate).toLocaleDateString()}
+                        ${subscription.status == "ACTIVE" ? new Date(subscription.nextPurchaseDate).toLocaleDateString() : ""}
                     </div>
                     <ul class="col s2 items">
                         ${_layoutItems}
