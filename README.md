@@ -5,7 +5,6 @@ This project stores the source code for Giftcards backend.
 ## Technologies
 
 - NodeJs
-- MongoDB with Mongoose
 - Express.js
 - Passport.js
 
@@ -13,12 +12,12 @@ This project stores the source code for Giftcards backend.
 
 The project is composed by six (6) main folders.
 
-1. `models` to store all the database models in a `Mongoose` format. Each entity must be in a separated file.
-2. `routes` to handle all the requests and responses. Right now the project does not use `sues.js`. It will be removed soon. Avoid to modify that file. Check the documentation to more information.
+2. `routes` to handle all the requests and responses.
 3. `utils` to store function to reuse or helpers.
 4. `public` to create the views for documentation and errors.
 5. `config` Handle the sessions and tokens with Passport.
 6. `bin` to handle some server events.
+7. `controllers` to define the business logic. It contains all the implementations for giftcards, logistics, catalog, subscriptions, comerssia, etc.
 
 ## Contribution
 
