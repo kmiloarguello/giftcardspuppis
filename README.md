@@ -24,7 +24,7 @@ The project is composed by six (6) main folders.
 Clone the project. Don't forget to add a SSH key to your account.
 
 ```
-git@gitlab.com:conflux-solutions/web-backend.git
+https://github.com/Puppis-Colombia/giftcardspuppis.git
 ```
 Install the packages
 ```
