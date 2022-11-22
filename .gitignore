@@ -9,3 +9,7 @@ Design/
 *.key
 *.crt
 *.pem
+*.log
+*.txt
+.DS_STORE
+jobs/config.job.json

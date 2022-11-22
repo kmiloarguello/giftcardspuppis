@@ -57,15 +57,6 @@ const toTimestamp = (strDate) => {
 	return datum;
 };
 
-/**
- * 
- * @param {Number} max_affluences_allowed persons
- * @param {Number} shift_attention_mins minutes
- * @param {Number} time in minutes
- */
-const checkMaxAffluencesinSlot = (max_affluences_allowed, shift_attention_mins, time = 30) => {
-	return ( time * max_affluences_allowed ) / shift_attention_mins
-}
 
 /**
  * Change from hours to days
@@ -112,104 +103,27 @@ const isValidDate = (d) => {
 	return d instanceof Date && !isNaN(d);
 }
 
-const createAutomaticCheckout = (req) => {
-
-	if(!req) return console.log("Request is undefined to make checkout.");
-
-	let url_dev = 'http://' + process.env.DB_HOST + ':' + process.env.PORT + '/establishment/checkout';
-	let url_prod = 'https://' + process.env.DB_HOST + '/establishment/checkout';
-
-	let _options_checkout = {
-		url: process.env.ENV == "production" ? url_prod : url_dev,
-		method: "PUT",
-		headers: {
-		'Authorization': req.headers.authorization
-		}
-	};
-
-	request(_options_checkout, (err, response, body) => {
-		if(err) console.error(err);
-		if(response && response.statusCode === 200 && typeof body !== "undefined"){
-			console.log("Checkout was automatically made.");
-		}else{
-			console.error("Checkout wasn't made.");
-		}
-	});
-}
-
-
-const sendConfirmationEmail = ({ author="Edison" ,email, subject, description }) => {
-	var transporter = nodemailer.createTransport({
-		service: process.env.EMAIL_CONFLUX,
-		secure: false, // true for 465, false for other ports
-		port: 35,
-		auth: {
-			user: process.env.EMAIL_CONFLUX,
-			pass: process.env.PASSWORD_CONFLUX
-		},
-		tls: {
-			rejectUnauthorized: false
-		}
-	});
-
-	transporter.verify(function(error, success) {
-		if (error) {
-		  console.log(error);
-		} else {
-		  console.log("Server is ready to take our messages",success);
-		}
-	});
-	
-	var mailOptions = {
-		from: `"${author} from Confflux" <${process.env.EMAIL_CONFLUX}>`,
-		to: email,
-		subject: subject,
-		text: description
-	};
-
-	transporter.sendMail(mailOptions, (error, info) => {
-		if (error) {
-		  console.log("ERROR sending an email", error);
-		} else {
-		  console.log('Email sent: ' + info.response);
-		}
-	});
-
+/**
+ * @desc This function returns the yesterday date
+ * @returns "yyyy-mm-dd"
+ */
+const getYesterdayFormatDay = () => {
+	var date = new Date();
+	date.setDate(date.getDate() - 1);
+	const data = String(date.getFullYear()) + "-" + String(date.getMonth() + 1) + "-" + String(date.getUTCDate());
+	return data;
 }
 
 /**
- * @description Get the time slot for a given date
- * @param {Date} date 
- * @param {Object} timetable 
- * @param {Number} slotSize 
+ * @desc This function returns the todays date
+ * @returns "yyyy-mm-dd"
  */
-const getTimeSlotsPerDay = (date, timetable, slotSize = 30) => {
-	let timeSlots = [];
-	let dayStart = new Date(date);
-	let dayEnd = new Date(date);
-
-	// Check all the available days in the DB
-	for(let i=0; i < timetable.day.length; i++){
-
-		// TODO: Check the day if the establishment is open or not use timetable.day[i]
-		// If the day exists and if that day belongs to the DB
-		if(date.getDay() === timetable.day[i]){
-			// Asign an stard hour and end hour for that day
-			let open_hour = new Date(timetable.open_hour).getUTCHours();
-			dayStart.setHours(open_hour,0,0,0);
-			let close_hour = new Date(timetable.close_hour).getUTCHours();
-			dayEnd.setHours(close_hour,0,0,0);
-
-		}
-	}
-
-	do {
-		timeSlots.push(new Date(dayStart))
-	  	dayStart.setHours(dayStart.getHours(), dayStart.getMinutes() + slotSize);
-	} while (dayStart < dayEnd);
-  
-	return timeSlots;
+const getTodayFormatDay = () => {
+	var date = new Date();
+	const data = String(date.getFullYear()) + "-" + String(date.getMonth() + 1) + "-" + String(date.getUTCDate());
+	return data;
 }
+
 
 /**
  * Converts a Binary file into a Base64File
@@ -227,62 +141,17 @@ const toBase64 = (file) => {
 	});
 } 
 
-/**
- * Transform from km to m
- * @param {String} value Value in kilometers
- * @returns {Integer} Value in meters as integer, default = 5000
- */
-const fromKMtoM = (value) => {
-
-	if( !value ) return console.log("You should indicate the value to change.");
-
-	let valueInMeters = null;
-
-	if( new RegExp("km","ig").test(value) ){
-		try{
-
-			let _lowercase = value.toLowerCase();
-			let _withoutSpaces = _lowercase.replace(/\s+/g, '');
-			let _onlyNumber = _withoutSpaces.split("km")[0];
-
-			valueInMeters = parseInt(_onlyNumber) * 1000;
-
-			return valueInMeters;
-
-		}catch(err) {
-			console.error("🚨 Error trying to clean the value in kilometers", err);
-		};
-	}else if( new RegExp("m","ig").test(value) ){
-		try{
-			let _lowercase = value.toLowerCase();
-			let _withoutSpaces = _lowercase.replace(/\s+/g, '');
-			let _onlyNumber = _withoutSpaces.split("m")[0];
-
-			valueInMeters = parseInt(_onlyNumber) ;
-
-			return valueInMeters;
-
-		}catch(err) {
-			console.error("🚨 Error trying to clean the value in meters", err);
-		};
-	} 
-
-	return 5000; // R
-}
 
 
 module.exports = {
     calculateDistance,
 	toTimestamp,
-	checkMaxAffluencesinSlot,
 	fromHoursToDays,
 	normalizeData,
 	isTimestamp,
 	getRandomInt,
 	isValidDate,
-	createAutomaticCheckout,
-	sendConfirmationEmail,
-	getTimeSlotsPerDay,
 	toBase64,
-	fromKMtoM
+	getYesterdayFormatDay,
+	getTodayFormatDay
 }
