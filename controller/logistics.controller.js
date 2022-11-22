@@ -1,22 +1,10 @@
-const express = require("express");
-const router = express.Router();
-const request = require("request");
-const https = require("https");
 const axios = require('axios');
-const cron = require("node-cron");
-const multer  =   require('multer');
-const path = require('path');
-const fs = require('fs');
+const {
+    getStatesCities,
+    getPickupPoints
+} = require("../utils/logistics.utils");
 
-const { errorGenerator } = require("../utils/curries");
-const { response } = require("express");
-const { uploadOwner } = require("../utils/multer");
-
-axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercestable.com.br";
-axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
-axios.defaults.headers.common['X-VTEX-API-AppToken'] = process.env.VTEX_API_TOKEN;
-
-router.get("/get-pickup-by-city", (req, res) => {
+exports.getPickupPointByCity = (req, res) => {
 
     let { query } = req;
 
@@ -45,10 +33,9 @@ router.get("/get-pickup-by-city", (req, res) => {
             })
         })
  
-});
+}
 
-
-router.get('/get-coords-by-address', (req, res) => {
+exports.getCoordsByAddress = (req, res) => {
 
     let { query } = req;
 
@@ -86,10 +73,9 @@ router.get('/get-coords-by-address', (req, res) => {
             })
         });
 
-});
+}
 
-
-router.get("/get-coords", (req, res) => {
+exports.getCoords = (req, res) => {
 
     let { query } = req;
 
@@ -119,11 +105,49 @@ router.get("/get-coords", (req, res) => {
             })
         })
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=YOUR_API_KEY
-});
-
-const getPickupPoints =  () => {
-    console.log("⏳ Getting logistics... ");
-    return axios.get("/api/logistics/pvt/configuration/pickuppoints/_search");
 }
 
-module.exports = router;
+exports.getStatesCities = (req, res) => {
+
+    const { headers } = req;
+
+    if (!headers["rest-range"] || 
+        headers["rest-range"].length == 0 ||
+        !/resources=/ig.test(headers["rest-range"])
+        ) {
+        return res.status(400).json({
+            success: false,
+            message:"There is not REST-range in the header request"
+        });
+    }
+
+    try {
+        
+        let restRange = headers["rest-range"].split("resources=")[1];
+        const _from = restRange.split("-")[0];
+        const _to = restRange.split("-")[1];
+
+        getStatesCities(_from, _to)
+            .then(data => data.data)
+            .then(statesAndCities => {
+                console.log("✅ States and cities obtained obtained.");
+                res.json({
+                    success: true,
+                    value: statesAndCities
+                })            
+            })
+            .catch(error => {
+                console.log("Error getting the logistics", error);
+                res.status(500).json({
+                    success: false,
+                    message: "There was an error getting the States & Cities: " + String(error)
+                })
+            })
+
+    } catch(err) {
+        return res.status(500).json({
+            success: false,
+            message: String(err)
+        });
+    }
+}

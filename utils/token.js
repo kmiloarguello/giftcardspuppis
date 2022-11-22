@@ -20,5 +20,5 @@ const generateAccessToken = ({ _id, email, type }, expiresIn=parseInt(process.en
     
 
 module.exports = {
-    generateAccessToken: generateAccessToken
+    generateAccessToken
 }
