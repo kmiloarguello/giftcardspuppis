@@ -12,3 +12,4 @@ Design/
 *.log
 *.txt
 .DS_STORE
+jobs/config.job.json

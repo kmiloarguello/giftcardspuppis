@@ -13,7 +13,7 @@ exports.getProductBySku = (req, res, next) => {
         .catch(err => {
             const { status, statusText } = err.response;
             if (status == 404) {
-                return res.json({ success: false, message: statusText  })
+                return res.status(404).json({ success: false, message: statusText  })
             } else {
                 return next(createError(err));
             }            

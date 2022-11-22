@@ -3,8 +3,7 @@ const sql = require('mssql');
 const createError = require('http-errors');
 const axios = require('axios');
 const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
-const { transformObjectInsider, getPhoneNumber, appendObjectInsider } = require("../utils/insider.utils");
-
+const { transformObjectInsider, appendObjectInsider,readConfig, updateConfig, checkDaysOrder, checkHoursOrder,checkDate,checkHour } = require("../utils/insider.utils");
 
 exports.getOrders = (req, res, next) => {
 
@@ -172,13 +171,17 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
                 return axios.get(url).then(response => response.data );
             });
             
-            Promise.all(reqProductIDs)
+            Promise.allSettled(reqProductIDs)
+                .then(results => results.filter(result => result.status === "fulfilled"))
+                .then(results => results.map(result => result.value))
                 .then(vtexProducts => {
 
                     const filterVtexProducts = vtexProducts.filter(product => product && product.LinkId);
                     const reqProducts = filterVtexProducts.map(product => axios.get(`${process.env.SERVER_HOST}/api/catalog/url/${product.LinkId}`).then(response => response.status < 400 ? response.data : null));
                 
-                    Promise.all(reqProducts)
+                    Promise.allSettled(reqProducts)
+                        .then(results => results.filter(result => result.status === "fulfilled"))
+                        .then(results => results.map(result => result.value))
                         .then(products => products.filter(product => product && product.length > 0))
                         .then(purchase => purchase.map(products => products.map(product => { return { productId: product.productId, categories: product.categories } })))
                         .then(purchase => {
@@ -190,16 +193,16 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
 
                             // Assuming that the append was not possible due one of arrays was undefined
                             // We take either onlineUsers or offlineUsers
-                            if (typeof totalUsers == "undefined" || !totalUsers || totalUsers.users.length == 0) {
-                                if (onlineUsers && onlineUsers.users.length > 0) {
+                            if (typeof totalUsers == "undefined" || !totalUsers || totalUsers && totalUsers.users && totalUsers.users.length == 0) {
+                                if (onlineUsers && onlineUsers.users && onlineUsers.users.length > 0) {
                                     totalUsers = onlineUsers;
-                                } else if ( offlineUsers && offlineUsers.users.length > 0 ){
+                                } else if ( offlineUsers && offlineUsers.users && offlineUsers.users.length > 0 ){
                                     totalUsers = offlineUsers;
                                 } 
                             }
 
                             // If the array is still not valid we just do not send the data
-                            if (!totalUsers || totalUsers.users.length == 0 ) {
+                            if (!totalUsers || totalUsers.users && totalUsers.users.length == 0 ) {
                                 return [];
                             } else {
                                 return totalUsers;
@@ -207,22 +210,47 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
 
                         })
                         .then(records => {
+
                             if (records.length == 0) {
                                 res.json({ success: false, message: "No data has been sent to Insider." })
                             } else {
                                 axios.post(insiderURL, records)
                                     .then(data => data.data)
-                                    .then(result => res.json({ input: records, result }))
+                                    .then(result => res.json({ result }))
                                     .catch(err => next(createError(err)));
                             }
                             
                         })
                         .catch(err => next(createError(err)));
-                        
                 })
                 .catch(err => next(createError(err)));
 
         })
         .catch(err => next(createError(err)));
 
+}
+
+exports.getConfig = (req, res, next) => {
+    const token = req.headers["puppis-token"];
+    if (!token) return next(createError(400, "There is not token"));
+    if (process.env.PUPPIS_TOKEN != token) return next(createError(401, "Unauthorized"));
+    res.json(readConfig());
+}
+
+exports.updateConfig = (req, res, next) => {
+    const token = req.headers["puppis-token"];
+    if (!token) return next(createError(400, "There is not token"));
+    if (process.env.PUPPIS_TOKEN != token) return next(createError(401, "Unauthorized"));
+    const body = req.body;
+    if (!body || Object.keys(body).length == 0) return next(createError(400, "There is not config"));
+    const { day_start, day_end, hour_start, hour_end, limit } = body.config;
+    if (!day_start || !day_end || !hour_start || !hour_end || !limit) return next(createError(400, "There is not config"));
+    if (!checkDaysOrder(day_start, day_end)) return next(createError(400, "The day_start must be before or equal to day_end"));
+    if (!checkHoursOrder(hour_start, hour_end)) return next(createError(400, "The hour_start must be before hour_end"));
+    if (!checkDate(day_start)) return next(createError(400, "The day_start is not valid"));
+    if (!checkDate(day_end)) return next(createError(400, "The day_end is not valid"));
+    if (!checkHour(hour_start)) return next(createError(400, "The hour_start is not valid"));
+    if (!checkHour(hour_end)) return next(createError(400, "The hour_end is not valid"));
+    updateConfig(body);
+    res.json({ success: true, message: "Config has been updated" });
 }
