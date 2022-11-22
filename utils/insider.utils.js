@@ -7,10 +7,16 @@ const fs = require("fs");
  * @returns 
  */
 const transformObjectInsider = (recordset, purchase) => {
-    if (!recordset) return console.error("🔴 Error in record set");
+    if (!recordset) {
+        console.error("🔴 Error in record set");
+        return [];
+    };
 
     // Helper to avoid construct data from not valid data
-    if (recordset.length == 0) return;
+    if (recordset.length == 0) {
+        console.error("Record set is empty");
+        return [];
+    }
 
     let clientes = recordset.filter(user => user.CLIEmailPrincipal && user.CLIEmailPrincipal.length > 0);
 
@@ -44,7 +50,8 @@ const transformObjectInsider = (recordset, purchase) => {
                 country: "CO",
                 phone_number: getPhoneNumber(client),
                 custom: {
-                    origen : client.Origen
+                    origen : client.Origen,
+                    MOVCodigo : client.MOVCodigo,
                 }
             },
             events:[
@@ -93,7 +100,7 @@ const appendObjectInsider = (usersA, usersB) => {
 const getPhoneNumber = (client) => {
     let phone_number = "";
 
-    if (client.CLICelular != "N/A" && client.CLICelular.length > 3) {
+    if (client.CLICelular != null && client.CLICelular != "N/A" && client.CLICelular.length > 3) {
         if (client.CLICelular.startsWith("+57")) {
             phone_number = client.CLICelular;
         } else if (client.CLICelular.startsWith("57")) {
@@ -101,7 +108,7 @@ const getPhoneNumber = (client) => {
         } else {
             phone_number = "+57" + client.CLICelular;
         }
-    } else if (client.CLITelefonoCasa != "N/A" && client.CLICelular.length > 3) {
+    } else if (client.CLITelefonoCasa != null && client.CLITelefonoCasa != "N/A" && client.CLITelefonoCasa.length > 3) {
         if (client.CLITelefonoCasa.startsWith("+57")) {
             phone_number = client.CLITelefonoCasa
         } else if (client.CLITelefonoCasa.startsWith("57")) {

@@ -193,16 +193,16 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
 
                             // Assuming that the append was not possible due one of arrays was undefined
                             // We take either onlineUsers or offlineUsers
-                            if (typeof totalUsers == "undefined" || !totalUsers || totalUsers.users.length == 0) {
-                                if (onlineUsers && onlineUsers.users.length > 0) {
+                            if (typeof totalUsers == "undefined" || !totalUsers || totalUsers && totalUsers.users && totalUsers.users.length == 0) {
+                                if (onlineUsers && onlineUsers.users && onlineUsers.users.length > 0) {
                                     totalUsers = onlineUsers;
-                                } else if ( offlineUsers && offlineUsers.users.length > 0 ){
+                                } else if ( offlineUsers && offlineUsers.users && offlineUsers.users.length > 0 ){
                                     totalUsers = offlineUsers;
                                 } 
                             }
 
                             // If the array is still not valid we just do not send the data
-                            if (!totalUsers || totalUsers.users.length == 0 ) {
+                            if (!totalUsers || totalUsers.users && totalUsers.users.length == 0 ) {
                                 return [];
                             } else {
                                 return totalUsers;

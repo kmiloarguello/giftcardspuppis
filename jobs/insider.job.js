@@ -65,7 +65,7 @@ const updateInsiderDB = async (params) => {
 
 // This function is the main function of the cron job
 const main = async () => {
-    console.log("\n ⏰ Starting cron job at" + new Date().toUTCString());
+    console.log("\n ⏰ Starting cron job at " + new Date().toUTCString());
     try {
 
         const config = readConfig();
