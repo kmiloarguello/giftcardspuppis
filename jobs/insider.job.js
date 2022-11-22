@@ -2,7 +2,7 @@ require('dotenv').config();
 const cron = require('node-cron');
 const axios = require('axios');
 const fs = require("fs");
-const { readConfig, updateConfig, getNextDay, getNextHours, isGreaterThan22 } = require("../utils/insider.utils");
+const { readConfig, updateConfig, getNextDay, getNextHours, getHoursDifference } = require("../utils/insider.utils");
 
 axios.defaults.baseURL = "https://" + process.env.ACCOUNTNAME + ".vtexcommercestable.com.br";
 axios.defaults.headers.common['X-VTEX-API-AppKey'] = process.env.VTEX_API_KEY;
@@ -30,9 +30,11 @@ const updateLogsFile = (data) => {
         if (response.data.success === false){
             message = response.data.message;
         }
-        usersUpdated = response.data && 
-                        response.data.result && 
-                        response.data.result.successful ? result.data.successful.count : 0;
+        if (response.data && response.data.result) {
+            const { result } = response.data;
+            usersUpdated = result.data.successful && result.data.successful.count ? result.data.successful.count : 0;
+            message = result.data.fail && result.data.fail.count ? result.data.fail.count + " users not updated": "";
+        }
     }
 
     console.log("Updating logs file");
@@ -85,13 +87,21 @@ const main = async () => {
         }
 
         const response = await updateInsiderDB(data);
+
+        const cDate = new Date(data.day_start + " " + data.hour_start);
+        // add one hour to the current hour
+        cDate.setHours(cDate.getHours() + 1);
+
+        const day = cDate.getFullYear() + "-" + (cDate.getMonth() + 1) + "-" + cDate.getDate();
+        const hour = cDate.getHours() + ":00:00";
+        
         const newConfig = {
             config: {
                 ...data,
-                day_start: isGreaterThan22(data.hour_start) ? getNextDay(data.day_start) : data.day_start,
-                day_end: isGreaterThan22(data.hour_end) ? getNextDay(data.day_end) : data.day_end,
-                hour_start: data.hour_end,
-                hour_end: getNextHours(data.hour_end, 2),
+                day_start: day,
+                day_end: day,
+                hour_start: hour,
+                hour_end: getNextHours(hour, 1),
             }
         };
 

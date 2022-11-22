@@ -3,7 +3,7 @@ const sql = require('mssql');
 const createError = require('http-errors');
 const axios = require('axios');
 const { getYesterdayFormatDay, getTodayFormatDay } = require("../utils/index.utils");
-const { transformObjectInsider, getPhoneNumber, appendObjectInsider,readConfig, updateConfig, checkDaysOrder, checkHoursOrder,checkDate,checkHour } = require("../utils/insider.utils");
+const { transformObjectInsider, appendObjectInsider,readConfig, updateConfig, checkDaysOrder, checkHoursOrder,checkDate,checkHour } = require("../utils/insider.utils");
 
 exports.getOrders = (req, res, next) => {
 
@@ -216,7 +216,7 @@ exports.updateInsiderFromComerssia = (req, res, next) => {
                             } else {
                                 axios.post(insiderURL, records)
                                     .then(data => data.data)
-                                    .then(result => res.json({ input: records, result }))
+                                    .then(result => res.json({ result }))
                                     .catch(err => next(createError(err)));
                             }
                             

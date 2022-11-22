@@ -13,10 +13,7 @@ const transformObjectInsider = (recordset, purchase) => {
     };
 
     // Helper to avoid construct data from not valid data
-    if (recordset.length == 0) {
-        console.error("Record set is empty");
-        return [];
-    }
+    if (recordset.length == 0) return [];
 
     let clientes = recordset.filter(user => user.CLIEmailPrincipal && user.CLIEmailPrincipal.length > 0);
 
@@ -51,7 +48,7 @@ const transformObjectInsider = (recordset, purchase) => {
                 phone_number: getPhoneNumber(client),
                 custom: {
                     origen : client.Origen,
-                    MOVCodigo : client.MOVCodigo,
+                    movcodigo : client.MOVCodigo,
                 }
             },
             events:[
@@ -258,6 +255,8 @@ const readConfig = () => {
 const updateConfig = (data) => {
     fs.writeFileSync("./jobs/config.job.json", JSON.stringify(data));
 }
+
+
 
 module.exports = {
     transformObjectInsider,
